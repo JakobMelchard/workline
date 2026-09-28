@@ -16,8 +16,8 @@ import (
 	sitter "github.com/tree-sitter/go-tree-sitter"
 )
 
-// Target is the reps, seconds, minutes, meters or kilometers per set.
-// Unit is one of "reps", "s", "min", "m", "km". Max is nil unless a range.
+// Target is the reps, seconds, minutes or kilometers per set.
+// Unit is one of "reps", "s", "min", "km". Max is nil unless a range.
 type Target struct {
 	Min   float64  `json:"min"`
 	Max   *float64 `json:"max,omitempty"`
@@ -206,7 +206,11 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	}
 	target := Target{Min: p.num(minNode), Unit: "reps"}
 	if u := t.ChildByFieldName("unit"); u != nil {
-		target.Unit = strings.ToLower(p.text(u))
+		unit, ok := targetUnits[strings.ToLower(p.text(u))]
+		if !ok {
+			return Group{}, errf("unknown target unit %q", p.text(u))
+		}
+		target.Unit = unit
 	}
 	if maxNode := t.ChildByFieldName("max"); maxNode != nil {
 		max := p.num(maxNode)
@@ -298,8 +302,8 @@ func (p *lineParser) mods(node *sitter.Node) (Mods, error) {
 				return Mods{}, err
 			}
 			secs := int(value)
-			if strings.ToLower(p.text(u)) == "min" {
-				secs *= 60
+			if strings.ToLower(p.text(u)) != "s" {
+				secs *= 60 // "m" or "min"
 			}
 			if err := claim("rest"); err != nil {
 				return Mods{}, err
@@ -318,6 +322,12 @@ func (p *lineParser) num(n *sitter.Node) float64 {
 	}
 	return v
 }
+
+// targetUnits maps target suffixes to JSON unit names: "m" and "min" are minutes.
+var targetUnits = map[string]string{"r": "reps", "s": "s", "m": "min", "min": "min", "km": "km"}
+
+// unitSuffix is the canonical target suffix per unit; reps has none.
+var unitSuffix = map[string]string{"reps": "", "s": "s", "min": "m", "km": "km"}
 
 func field(n *sitter.Node, name string) (*sitter.Node, error) {
 	if f := n.ChildByFieldName(name); f != nil {
@@ -443,15 +453,13 @@ func SerializeLine(line Line) string {
 	return b.String()
 }
 
-// String renders the canonical target, e.g. "8-12", "30s+", "5".
+// String renders the canonical target, e.g. "8-12", "30s+", "20m", "5".
 func (t Target) String() string {
 	s := jsNum(t.Min)
 	if t.Max != nil {
 		s += "-" + jsNum(*t.Max)
 	}
-	if t.Unit != "reps" {
-		s += t.Unit
-	}
+	s += unitSuffix[t.Unit]
 	if t.Amrap {
 		s += "+"
 	}
@@ -483,7 +491,7 @@ func SerializeMods(m Mods) []string {
 	if m.Rest != nil {
 		r := *m.Rest
 		if r%60 == 0 && r > 0 {
-			out = append(out, strconv.Itoa(r/60)+"min")
+			out = append(out, strconv.Itoa(r/60)+"m")
 		} else {
 			out = append(out, strconv.Itoa(r)+"s")
 		}

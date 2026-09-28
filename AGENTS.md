@@ -47,5 +47,8 @@ swift build
   through an app untouched.
 - The grammar is ABI 15, so `go.mod` needs go-tree-sitter >= v0.25.0; older
   versions load the language but every parse fails. Keep that after `init -u`.
+- cgo does not track `src/parser.c` (bindings/go `#include`s it from outside the
+  package), so after regenerating `src/` run `go clean -cache` before `go test`,
+  or Go tests the stale parser.
 - Versions live in `package.json` and `tree-sitter.json`; bump both and tag.
   Consumers pin tags.
