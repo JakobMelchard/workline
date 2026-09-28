@@ -13,7 +13,7 @@ repos:
       - id: conventional-commit
   - repo: local
     hooks:
-      # loadline is a dependency: a broken export reaches every consumer before their CI runs
+      # workline is a dependency: a broken export reaches every consumer before their CI runs
       - id: tsc
         name: tsc
         entry: npx --no-install tsc

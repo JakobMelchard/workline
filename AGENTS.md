@@ -1,4 +1,4 @@
-# loadline: set notation spec + JS reference parser
+# workline: set notation spec + JS reference parser
 
 `SPEC.md` is the contract, `test/vectors.json` is its executable form, and
 `src/index.js` is the reference implementation. JSDoc only, no TypeScript
@@ -18,7 +18,7 @@ npm test         # node:test, test/*.test.js
   without a vector is not done.
 - Ports in other languages (Go, Kotlin, Swift) live in their consumer repos
   and must pass `vectors.json`; the package exports it as
-  `@jakobmelchard/loadline/vectors.json`.
+  `@jakobmelchard/workline/vectors.json`.
 - Nothing here may be copied from Liftosaur (AGPL-3.0). Borrow notation from
   its public docs only, never its grammar files or source.
 - Serialize keeps error lines verbatim so a bad cell survives a round trip

@@ -1,4 +1,4 @@
-# loadline spec, v1
+# workline spec, v1
 
 A text notation for prescribed and performed strength sets, one exercise per
 line. Built to live in a spreadsheet cell and stay readable there.

@@ -1,5 +1,5 @@
 /**
- * loadline v1 reference parser. See SPEC.md.
+ * workline v1 reference parser. See SPEC.md.
  * @typedef {'reps'|'s'|'min'|'m'|'km'} TargetUnit
  * @typedef {{min:number, max?:number, unit:TargetUnit, amrap?:true}} Target
  * @typedef {{value?:number, unit?:'kg'|'lb', ask?:true}} Weight
