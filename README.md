@@ -4,7 +4,7 @@ Text notation for strength sets, one exercise per line, made to live in a
 spreadsheet cell. Syntax inspired by Liftoscript exercise lines.
 
 ```
-Bench Press / 4x5, 1x5+ @8 / 100kg 2min
+Bench Press / 4x5, 1x5+ @8 / 100kg 2m
 ```
 
 One tree-sitter grammar ([`grammar.js`](grammar.js)) defines the syntax for

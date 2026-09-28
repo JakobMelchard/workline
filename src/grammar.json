@@ -212,7 +212,7 @@
                   "type": "IMMEDIATE_TOKEN",
                   "content": {
                     "type": "PATTERN",
-                    "value": "min|km|s|m",
+                    "value": "r|s|m|min|km",
                     "flags": "i"
                   }
                 },
@@ -592,7 +592,7 @@
               "type": "IMMEDIATE_TOKEN",
               "content": {
                 "type": "PATTERN",
-                "value": "s|min",
+                "value": "s|m|min",
                 "flags": "i"
               }
             },
@@ -622,7 +622,7 @@
               "type": "IMMEDIATE_TOKEN",
               "content": {
                 "type": "PATTERN",
-                "value": "s|min",
+                "value": "s|m|min",
                 "flags": "i"
               }
             },

@@ -14,10 +14,11 @@ from the shared tree-sitter grammar; each language adds only the semantics below
 3x8                         3 sets of 8 reps
 3x8-12 60kg                 rep range, fixed weight
 Bench Press / 4x5, 1x5+ @8  named, 4x5 then one AMRAP set at RPE 8
-Squat / 3x5 80% / 3min      last section applies to every group
+Squat / 3x5 80% / 3m        last section applies to every group
 1x6 70%+, 5x5 50% 90s       per-group loads and rest
 3x30s                       timed sets
-1x400m @7+                  distance set, RPE logged
+1x20m @7+                   20 minutes, RPE logged
+1x2km                       distance set
 ```
 
 ## Syntax
@@ -29,9 +30,11 @@ only covers what the syntax cannot express. In short:
 - `line = [name "/"] group {"," group} ["/" mods]`, one per text line
 - `name` is any text before the first `/` that does not start with a digit
 - `group = SETS x TARGET [mods]`, `x` also `X` or `×`
-- `TARGET = N[-N][s|min|m|km][+]`, suffixes written with no space before them
+- `TARGET = N[-N][r|s|m|km][+]`: `r` reps (the default when omitted), `s`
+  seconds, `m` minutes, `km` kilometers. `min` is accepted for `m`.
+  Suffixes are written with no space before them
 - `mods` in any order: weight `60kg` / `135lb` / `?+`, percent `80%`,
-  rpe `@8`, rest `90s` / `2min`, each optionally followed by `+` where the
+  rpe `@8`, rest `90s` / `2m` (`min` accepted), each optionally followed by `+` where the
   semantics below allow it
 
 Mods are separated by spaces or tabs: `60kg 50%`, never `60kg50%`. Only an
@@ -42,7 +45,7 @@ before a suffix.
 ## Semantics
 
 - **sets**: a whole number >= 1.
-- **target**: the reps (or seconds, minutes, meters, kilometers) per set.
+- **target**: the reps (or seconds, minutes, kilometers) per set.
   `8-12` is a range, `min <= max`. A trailing `+` marks it as logged:
   AMRAP for reps, "as long as possible" for time and distance.
 - **weight**: absolute load. `+` means the lifter confirms or edits it while
@@ -70,7 +73,8 @@ Serializing produces:
 - groups joined by `, `
 - inside a group: `SETSxTARGET`, then weight or percent, then rpe, then rest,
   separated by one space
-- rest as `Nmin` when a whole number of minutes, else `Ns`
+- targets in reps without `r`, minutes as `m`
+- rest as `Nm` when a whole number of minutes, else `Ns`
 - numbers without trailing zeros (`62.5`, `60`)
 - defaults as ` / mods` in the same mod order, omitted when empty
 
@@ -86,7 +90,8 @@ v1 reads `@` as RPE. For migration:
   form (`3x8@60kg` becomes `3x8 60kg`).
 - `@<num>` without a unit is RPE. Values above 10 error, which flags old
   unitless weights for manual fixing.
-- Legacy target suffixes other than `s`, `min`, `m`, `km` error.
+- Legacy target suffixes other than `r`, `s`, `m`, `min`, `km` error. Note
+  that a legacy `m` meant meters and now means minutes.
 
 ## Not in v1
 
