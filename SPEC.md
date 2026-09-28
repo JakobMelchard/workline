@@ -93,6 +93,12 @@ v1 reads `@` as RPE. For migration:
 - Legacy target suffixes other than `r`, `s`, `m`, `min`, `km` error. Note
   that a legacy `m` meant meters and now means minutes.
 
+`scripts/migrate-legacy.js` applies these rules to whole cells: it parses each
+line with the legacy grammar, rewrites `@<num>[kg|lb]` as a weight (unitless
+means kg), maps legacy `r` to reps and keeps `s`, `min`, `km`, checks the
+result with `parse`, and lists every line it cannot convert for manual fixing.
+Legacy `m` is always listed, never converted. Usage is in the README.
+
 ## Not in v1
 
 Program structure (weeks, days, reuse), progression scripts, warmups,

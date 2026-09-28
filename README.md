@@ -44,3 +44,23 @@ await init({ runtime, language })
 ```sh
 npm install && npm run build && npx tsc && npm test
 ```
+
+## Legacy migration
+
+`scripts/migrate-legacy.js` converts load cells written in the old
+`JakobMelchard/workout` grammar (`3x8@60`, `@` = weight, default kg) to
+workline (`3x8 60kg`). Lines it cannot convert safely are kept verbatim and
+listed for manual fixing, including every legacy `m` target (meters or
+minutes; workline `m` is minutes). See SPEC.md "Legacy input".
+
+```sh
+node scripts/migrate-legacy.js cells.json          # or cells.csv, or stdin; report only
+node scripts/migrate-legacy.js --sheet <id|url>    # read-only: every tab's `load` column,
+                                                   # report + proposed values:batchUpdate JSON
+node scripts/migrate-legacy.js --sheet <id> --tab <name> --write   # test sheet only
+```
+
+`--sheet` authenticates with the service-account JSON in
+`GSHEET_SERVICE_PRINCIPAL_JSON` and a read-only scope. `--write` is refused
+unless the sheet is `$GSHEET_TEST_SHEET`; migrate real sheets by reviewing the
+proposed batch and applying it yourself. `--json` prints machine-readable output.
