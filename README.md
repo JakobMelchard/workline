@@ -14,7 +14,7 @@ every language and editor. Meaning: [`SPEC.md`](SPEC.md). Conformance cases:
 | Use | How |
 |---|---|
 | JS (Node, browser, Workers, Capacitor) | `@jakobmelchard/workline`, web-tree-sitter + `workline.wasm` |
-| Go | `github.com/JakobMelchard/workline/bindings/go` (cgo) |
+| Go | `github.com/JakobMelchard/workline/golang` (package `workline`, cgo): `Parse`, `Expand`, `Serialize`; raw grammar in `bindings/go` |
 | Swift | this repo as a Swift package, `TreeSitterWorkline` |
 | Kotlin / Android | KTreeSitter with this grammar |
 | Neovim | nvim-treesitter parser config pointing at this repo, `queries/` for highlights |
@@ -41,8 +41,17 @@ import language from '@jakobmelchard/workline/workline.wasm'
 await init({ runtime, language })
 ```
 
+```go
+import "github.com/JakobMelchard/workline/golang"
+
+p := workline.Parse(cell)        // p.Lines, p.Errors
+sets := workline.Expand(p.Lines[0])
+canonical := workline.Serialize(p)
+```
+
 ```sh
 npm install && npm run build && npx tsc && npm test
+go test ./bindings/go/ ./golang/
 ```
 
 ## Legacy migration
