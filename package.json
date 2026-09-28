@@ -1,0 +1,28 @@
+{
+  "name": "@jakobmelchard/loadline",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./vectors.json": "./test/vectors.json"
+  },
+  "files": [
+    "src",
+    "types",
+    "test/vectors.json",
+    "SPEC.md"
+  ],
+  "scripts": {
+    "prepare": "tsc -p tsconfig.build.json",
+    "check": "tsc",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "@jakobmelchard/config": "github:JakobMelchard/.config#v1.0.0",
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,99 @@
+[
+  {
+    "in": "3x8",
+    "canonical": "3x8",
+    "lines": [{ "sets": [
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } }
+    ] }]
+  },
+  {
+    "in": "2X8-12   62.50kg",
+    "canonical": "2x8-12 62.5kg",
+    "lines": [{ "sets": [
+      { "target": { "min": 8, "max": 12, "unit": "reps" }, "weight": { "value": 62.5, "unit": "kg" } },
+      { "target": { "min": 8, "max": 12, "unit": "reps" }, "weight": { "value": 62.5, "unit": "kg" } }
+    ] }]
+  },
+  {
+    "in": "Bench  Press/1x5 @8 ,1x5+ @9+",
+    "canonical": "Bench Press / 1x5 @8, 1x5+ @9+",
+    "lines": [{ "name": "Bench Press", "sets": [
+      { "target": { "min": 5, "unit": "reps" }, "rpe": { "value": 8 } },
+      { "target": { "min": 5, "unit": "reps", "amrap": true }, "rpe": { "value": 9, "ask": true } }
+    ] }]
+  },
+  {
+    "in": "Squat / 1x5 80%, 1x3 100kg+ / 180s 70%",
+    "canonical": "Squat / 1x5 80%, 1x3 100kg+ / 70% 3min",
+    "lines": [{ "name": "Squat", "sets": [
+      { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 },
+      { "target": { "min": 3, "unit": "reps" }, "weight": { "value": 100, "unit": "kg", "ask": true }, "rest": 180 }
+    ] }]
+  },
+  {
+    "in": "1x6 90s ?+ @8, 1x6 / 2min",
+    "canonical": "1x6 ?+ @8 90s, 1x6 / 2min",
+    "lines": [{ "sets": [
+      { "target": { "min": 6, "unit": "reps" }, "weight": { "ask": true }, "rpe": { "value": 8 }, "rest": 90 },
+      { "target": { "min": 6, "unit": "reps" }, "rest": 120 }
+    ] }]
+  },
+  {
+    "in": "Plank / 2x30s+\nRow / 1x2km @7",
+    "canonical": "Plank / 2x30s+\nRow / 1x2km @7",
+    "lines": [
+      { "name": "Plank", "sets": [
+        { "target": { "min": 30, "unit": "s", "amrap": true } },
+        { "target": { "min": 30, "unit": "s", "amrap": true } }
+      ] },
+      { "name": "Row", "sets": [
+        { "target": { "min": 2, "unit": "km" }, "rpe": { "value": 7 } }
+      ] }
+    ]
+  },
+  {
+    "in": "1×400m 45s",
+    "canonical": "1x400m 45s",
+    "lines": [{ "sets": [{ "target": { "min": 400, "unit": "m" }, "rest": 45 }] }]
+  },
+  {
+    "in": "1x5-5 20lb",
+    "canonical": "1x5 20lb",
+    "lines": [{ "sets": [{ "target": { "min": 5, "unit": "reps" }, "weight": { "value": 20, "unit": "lb" } }] }]
+  },
+  {
+    "comment": "legacy: @ with a unit is weight",
+    "in": "3x8@60kg\n2x30s@20LB",
+    "canonical": "3x8 60kg\n2x30s 20lb",
+    "lines": [
+      { "sets": [
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } },
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } },
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } }
+      ] },
+      { "sets": [
+        { "target": { "min": 30, "unit": "s" }, "weight": { "value": 20, "unit": "lb" } },
+        { "target": { "min": 30, "unit": "s" }, "weight": { "value": 20, "unit": "lb" } }
+      ] }
+    ]
+  },
+  {
+    "comment": "errors keep their raw text and position; blank lines drop",
+    "in": "3x8@60\n\n1x5\nBench\n3x8 60kg 50%",
+    "canonical": "3x8@60\n1x5\nBench\n3x8 60kg 50%",
+    "errors": [0, 3, 4],
+    "lines": [{ "sets": [{ "target": { "min": 5, "unit": "reps" } }] }]
+  },
+  { "in": "0x5", "errors": [0] },
+  { "in": "3x12-8", "errors": [0] },
+  { "in": "3x8reps", "errors": [0] },
+  { "in": "3x8 @8 @9", "errors": [0] },
+  { "in": "3x8 @0", "errors": [0] },
+  { "in": "3x8 250%", "errors": [0] },
+  { "in": "3x8 60", "errors": [0] },
+  { "in": "3x8 /", "errors": [0] },
+  { "in": "A / 3x8 / 60kg / 90s", "errors": [0] },
+  { "in": "/ 3x8", "errors": [0] }
+]

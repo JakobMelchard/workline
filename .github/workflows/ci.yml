@@ -1,0 +1,16 @@
+name: ci
+on: { push: { branches: [main] }, pull_request: {} }
+jobs:
+  self:
+    uses: JakobMelchard/.github/.github/workflows/node.yml@main
+    with:
+      # No committed lockfile, so npm ci would fail.
+      install-cmd: npm install
+      lint-cmd: ""
+      check-cmd: npx tsc
+      test-cmd: npm test
+  hooks:
+    uses: JakobMelchard/.github/.github/workflows/hooks.yml@main
+    with:
+      # tsc and npm test run in the self job above
+      skip: tsc,test
