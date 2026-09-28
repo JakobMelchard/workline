@@ -139,8 +139,8 @@
           }
         },
         {
-          "type": "PATTERN",
-          "value": "[xX×]"
+          "type": "SYMBOL",
+          "name": "times"
         },
         {
           "type": "FIELD",
@@ -163,6 +163,10 @@
           ]
         }
       ]
+    },
+    "times": {
+      "type": "PATTERN",
+      "value": "[xX×]"
     },
     "target": {
       "type": "SEQ",

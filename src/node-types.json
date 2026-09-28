@@ -72,11 +72,15 @@
       }
     },
     "children": {
-      "multiple": false,
-      "required": false,
+      "multiple": true,
+      "required": true,
       "types": [
         {
           "type": "mods",
+          "named": true
+        },
+        {
+          "type": "times",
           "named": true
         }
       ]
@@ -347,6 +351,10 @@
   },
   {
     "type": "number",
+    "named": true
+  },
+  {
+    "type": "times",
     "named": true
   },
   {

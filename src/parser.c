@@ -24,7 +24,7 @@ enum ts_symbol_identifiers {
   anon_sym_SLASH = 2,
   anon_sym_COMMA = 3,
   sym_name = 4,
-  aux_sym_group_token1 = 5,
+  sym_times = 5,
   anon_sym_DASH = 6,
   aux_sym_target_token1 = 7,
   anon_sym_PLUS = 8,
@@ -66,7 +66,7 @@ static const char * const ts_symbol_names[] = {
   [anon_sym_SLASH] = "/",
   [anon_sym_COMMA] = ",",
   [sym_name] = "name",
-  [aux_sym_group_token1] = "group_token1",
+  [sym_times] = "times",
   [anon_sym_DASH] = "-",
   [aux_sym_target_token1] = "unit",
   [anon_sym_PLUS] = "ask",
@@ -108,7 +108,7 @@ static const TSSymbol ts_symbol_map[] = {
   [anon_sym_SLASH] = anon_sym_SLASH,
   [anon_sym_COMMA] = anon_sym_COMMA,
   [sym_name] = sym_name,
-  [aux_sym_group_token1] = aux_sym_group_token1,
+  [sym_times] = sym_times,
   [anon_sym_DASH] = anon_sym_DASH,
   [aux_sym_target_token1] = aux_sym_target_token1,
   [anon_sym_PLUS] = anon_sym_PLUS,
@@ -165,9 +165,9 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [aux_sym_group_token1] = {
-    .visible = false,
-    .named = false,
+  [sym_times] = {
+    .visible = true,
+    .named = true,
   },
   [anon_sym_DASH] = {
     .visible = true,
@@ -738,7 +738,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
           lookahead != '/') ADVANCE(25);
       END_STATE();
     case 26:
-      ACCEPT_TOKEN(aux_sym_group_token1);
+      ACCEPT_TOKEN(sym_times);
       END_STATE();
     case 27:
       ACCEPT_TOKEN(anon_sym_DASH);
@@ -886,7 +886,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [anon_sym_LF] = ACTIONS(1),
     [anon_sym_SLASH] = ACTIONS(1),
     [anon_sym_COMMA] = ACTIONS(1),
-    [aux_sym_group_token1] = ACTIONS(1),
+    [sym_times] = ACTIONS(1),
     [anon_sym_DASH] = ACTIONS(1),
     [aux_sym_target_token1] = ACTIONS(1),
     [anon_sym_PLUS] = ACTIONS(1),
@@ -1659,7 +1659,7 @@ static const uint16_t ts_small_parse_table[] = {
       anon_sym_LF,
   [972] = 1,
     ACTIONS(204), 1,
-      aux_sym_group_token1,
+      sym_times,
   [976] = 1,
     ACTIONS(206), 1,
       sym_number,
@@ -1886,7 +1886,7 @@ TS_PUBLIC const TSLanguage *tree_sitter_workline(void) {
     .metadata = {
       .major_version = 0,
       .minor_version = 3,
-      .patch_version = 0,
+      .patch_version = 1,
     },
   };
   return &language;
