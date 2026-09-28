@@ -8,7 +8,8 @@
       "default": "./lib/index.js"
     },
     "./vectors.json": "./test/vectors.json",
-    "./workline.wasm": "./workline.wasm"
+    "./workline.wasm": "./workline.wasm",
+    "./web-tree-sitter.wasm": "./web-tree-sitter.wasm"
   },
   "files": [
     "lib",
@@ -20,10 +21,11 @@
     "tree-sitter.json",
     "test/vectors.json",
     "SPEC.md",
-    "LICENSE"
+    "LICENSE",
+    "web-tree-sitter.wasm"
   ],
   "scripts": {
-    "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm",
+    "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm && cp node_modules/web-tree-sitter/web-tree-sitter.wasm .",
     "prepare": "tsc -p tsconfig.build.json",
     "check": "tsc",
     "test": "node --test \"test/*.test.js\""
@@ -35,7 +37,7 @@
     "tree-sitter-cli": "0.27.0"
   },
   "dependencies": {
-    "web-tree-sitter": "^0.27.0"
+    "web-tree-sitter": "0.27.0"
   },
   "allowScripts": {
     "tree-sitter-cli@0.27.0": true
