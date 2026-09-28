@@ -111,7 +111,7 @@
                   "name": "defaults",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "mods"
+                    "name": "defaults"
                   }
                 }
               ]
@@ -254,121 +254,289 @@
     "mods": {
       "type": "REPEAT1",
       "content": {
-        "type": "CHOICE",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "weight"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "ask_weight"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "percent"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "rpe"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "rest"
-          }
-        ]
+        "type": "SYMBOL",
+        "name": "_mod"
       }
     },
-    "weight": {
-      "type": "CHOICE",
+    "defaults": {
+      "type": "SEQ",
       "members": [
         {
-          "type": "SEQ",
+          "type": "CHOICE",
           "members": [
             {
-              "type": "FIELD",
-              "name": "value",
+              "type": "ALIAS",
               "content": {
                 "type": "SYMBOL",
-                "name": "number"
-              }
+                "name": "_weight_first"
+              },
+              "named": true,
+              "value": "weight"
             },
             {
-              "type": "FIELD",
-              "name": "unit",
+              "type": "ALIAS",
               "content": {
-                "type": "ALIAS",
-                "content": {
-                  "type": "IMMEDIATE_TOKEN",
-                  "content": {
-                    "type": "PATTERN",
-                    "value": "kg|lb",
-                    "flags": "i"
-                  }
-                },
-                "named": true,
-                "value": "unit"
-              }
+                "type": "STRING",
+                "value": "?+"
+              },
+              "named": true,
+              "value": "ask_weight"
             },
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "FIELD",
-                  "name": "ask",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_ask"
-                  }
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_percent_first"
+              },
+              "named": true,
+              "value": "percent"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "rpe"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_rest_first"
+              },
+              "named": true,
+              "value": "rest"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_legacy_weight"
+              },
+              "named": true,
+              "value": "weight"
             }
           ]
         },
         {
-          "type": "SEQ",
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_mod"
+          }
+        }
+      ]
+    },
+    "_mod": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "weight"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "ask_weight"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "percent"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "rpe"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "rest"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_legacy_weight"
+          },
+          "named": true,
+          "value": "weight"
+        }
+      ]
+    },
+    "weight": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_gap_num"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "unit",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "PATTERN",
+                "value": "kg|lb",
+                "flags": "i"
+              }
+            },
+            "named": true,
+            "value": "unit"
+          }
+        },
+        {
+          "type": "CHOICE",
           "members": [
             {
-              "type": "STRING",
-              "value": "@"
-            },
-            {
               "type": "FIELD",
-              "name": "value",
+              "name": "ask",
               "content": {
                 "type": "SYMBOL",
-                "name": "_num_imm"
+                "name": "_ask"
               }
             },
             {
-              "type": "FIELD",
-              "name": "unit",
-              "content": {
-                "type": "ALIAS",
-                "content": {
-                  "type": "IMMEDIATE_TOKEN",
-                  "content": {
-                    "type": "PATTERN",
-                    "value": "kg|lb",
-                    "flags": "i"
-                  }
-                },
-                "named": true,
-                "value": "unit"
-              }
+              "type": "BLANK"
             }
           ]
         }
       ]
     },
+    "_weight_first": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "number"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "unit",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "PATTERN",
+                "value": "kg|lb",
+                "flags": "i"
+              }
+            },
+            "named": true,
+            "value": "unit"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "ask",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_ask"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_legacy_weight": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "@"
+        },
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_num_imm"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "unit",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "PATTERN",
+                "value": "kg|lb",
+                "flags": "i"
+              }
+            },
+            "named": true,
+            "value": "unit"
+          }
+        }
+      ]
+    },
     "ask_weight": {
-      "type": "STRING",
-      "value": "?+"
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "PATTERN",
+            "value": "[ \\t]+"
+          },
+          {
+            "type": "STRING",
+            "value": "?+"
+          }
+        ]
+      }
     },
     "percent": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_gap_num"
+          }
+        },
+        {
+          "type": "IMMEDIATE_TOKEN",
+          "content": {
+            "type": "STRING",
+            "value": "%"
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "ask",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_ask"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "_percent_first": {
       "type": "SEQ",
       "members": [
         {
@@ -401,6 +569,66 @@
               "type": "BLANK"
             }
           ]
+        }
+      ]
+    },
+    "rest": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_gap_num"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "unit",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "PATTERN",
+                "value": "s|min",
+                "flags": "i"
+              }
+            },
+            "named": true,
+            "value": "unit"
+          }
+        }
+      ]
+    },
+    "_rest_first": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "value",
+          "content": {
+            "type": "SYMBOL",
+            "name": "number"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "unit",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "PATTERN",
+                "value": "s|min",
+                "flags": "i"
+              }
+            },
+            "named": true,
+            "value": "unit"
+          }
         }
       ]
     },
@@ -437,35 +665,26 @@
         }
       ]
     },
-    "rest": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "FIELD",
-          "name": "value",
-          "content": {
-            "type": "SYMBOL",
-            "name": "number"
-          }
-        },
-        {
-          "type": "FIELD",
-          "name": "unit",
-          "content": {
-            "type": "ALIAS",
-            "content": {
-              "type": "IMMEDIATE_TOKEN",
-              "content": {
-                "type": "PATTERN",
-                "value": "s|min",
-                "flags": "i"
-              }
+    "_gap_num": {
+      "type": "ALIAS",
+      "content": {
+        "type": "TOKEN",
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[ \\t]+"
             },
-            "named": true,
-            "value": "unit"
-          }
+            {
+              "type": "PATTERN",
+              "value": "\\d+(\\.\\d+)?"
+            }
+          ]
         }
-      ]
+      },
+      "named": true,
+      "value": "number"
     },
     "_ask": {
       "type": "ALIAS",
