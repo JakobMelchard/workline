@@ -5,7 +5,8 @@ line. Built to live in a spreadsheet cell and stay readable there.
 Syntax is inspired by Liftosaur's Liftoscript exercise lines; nothing here is
 derived from its source.
 
-Implementations in any language must pass `test/vectors.json`.
+Implementations in any language must pass `test/vectors.json`. Syntax comes
+from the shared tree-sitter grammar; each language adds only the semantics below.
 
 ## Examples
 
@@ -19,32 +20,25 @@ Squat / 3x5 80% / 3min      last section applies to every group
 1x400m @7+                  distance set, RPE logged
 ```
 
-## Grammar
+## Syntax
 
-```ebnf
-cell     = line , { "\n" , line } ;
-line     = [ name , "/" ] , groups , [ "/" , mods ] ;
-name     = text not starting with a digit and not containing "/" ;
-groups   = group , { "," , group } ;
-group    = int , "x" , target , mods ;
-target   = num , [ "-" , num ] , [ tunit ] , [ "+" ] ;
-tunit    = "s" | "min" | "m" | "km" ;
-mods     = { ws , mod } ;
-mod      = weight | percent | rpe | rest ;
-weight   = num , wunit , [ "+" ] | "?+" ;
-wunit    = "kg" | "lb" ;
-percent  = num , "%" , [ "+" ] ;
-rpe      = "@" , num , [ "+" ] ;
-rest     = int , ( "s" | "min" ) ;
-int      = digit , { digit } ;
-num      = int , [ "." , int ] ;
-```
+[`grammar.js`](grammar.js) (tree-sitter) is the only definition of the syntax.
+Every implementation parses with the parser generated from it, so this spec
+only covers what the syntax cannot express. In short:
 
-Whitespace around `/`, `,` and between mods is free. Blank lines are ignored.
-`x` is case-insensitive and `×` is accepted as an alias.
+- `line = [name "/"] group {"," group} ["/" mods]`, one per text line
+- `name` is any text before the first `/` that does not start with a digit
+- `group = SETS x TARGET [mods]`, `x` also `X` or `×`
+- `TARGET = N[-N][s|min|m|km][+]`, suffixes written with no space before them
+- `mods` in any order: weight `60kg` / `135lb` / `?+`, percent `80%`,
+  rpe `@8`, rest `90s` / `2min`, each optionally followed by `+` where the
+  semantics below allow it
+
+Spaces and tabs are free between tokens, except before a suffix.
 
 ## Semantics
 
+- **sets**: a whole number >= 1.
 - **target**: the reps (or seconds, minutes, meters, kilometers) per set.
   `8-12` is a range, `min <= max`. A trailing `+` marks it as logged:
   AMRAP for reps, "as long as possible" for time and distance.
@@ -52,7 +46,7 @@ Whitespace around `/`, `,` and between mods is free. Blank lines are ignored.
   logging. `?+` means no prescribed weight, ask for it.
 - **percent**: percentage of 1RM, `0 < value <= 200`. `+` as for weight.
 - **rpe**: target RPE, `1 <= value <= 10`. `+` means the lifter logs actual RPE.
-- **rest**: rest after each set, stored in seconds.
+- **rest**: rest after each set, a whole number, stored in seconds.
 - A group holds at most one of each mod kind, and not both weight and percent.
 - The trailing `/ mods` section is the line's defaults. A group's own mod wins
   over the default of the same kind; weight and percent count as one kind.

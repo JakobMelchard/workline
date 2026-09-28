@@ -95,5 +95,19 @@
   { "in": "3x8 60", "errors": [0] },
   { "in": "3x8 /", "errors": [0] },
   { "in": "A / 3x8 / 60kg / 90s", "errors": [0] },
-  { "in": "/ 3x8", "errors": [0] }
+  { "in": "/ 3x8", "errors": [0] },
+  {
+    "comment": "whitespace inside the head is free",
+    "in": "3 x 8 - 10",
+    "canonical": "3x8-10",
+    "lines": [{ "sets": [
+      { "target": { "min": 8, "max": 10, "unit": "reps" } },
+      { "target": { "min": 8, "max": 10, "unit": "reps" } },
+      { "target": { "min": 8, "max": 10, "unit": "reps" } }
+    ] }]
+  },
+  { "in": "1.5x8", "errors": [0] },
+  { "in": "3x8 1.5min", "errors": [0] },
+  { "in": "3x8 @ 8", "errors": [0] },
+  { "in": "Bench 3x8", "errors": [0] }
 ]

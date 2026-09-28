@@ -5,17 +5,25 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "default": "./src/index.js"
+      "default": "./lib/index.js"
     },
-    "./vectors.json": "./test/vectors.json"
+    "./vectors.json": "./test/vectors.json",
+    "./workline.wasm": "./workline.wasm"
   },
   "files": [
-    "src",
+    "lib",
     "types",
+    "workline.wasm",
+    "grammar.js",
+    "src",
+    "queries",
+    "tree-sitter.json",
     "test/vectors.json",
-    "SPEC.md"
+    "SPEC.md",
+    "LICENSE"
   ],
   "scripts": {
+    "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm",
     "prepare": "tsc -p tsconfig.build.json",
     "check": "tsc",
     "test": "node --test \"test/*.test.js\""
@@ -23,6 +31,14 @@
   "devDependencies": {
     "@jakobmelchard/config": "github:JakobMelchard/.config#v1.0.0",
     "@types/node": "^22",
-    "typescript": "^5"
-  }
+    "typescript": "^5",
+    "tree-sitter-cli": "0.27.0"
+  },
+  "dependencies": {
+    "web-tree-sitter": "^0.27.0"
+  },
+  "allowScripts": {
+    "tree-sitter-cli@0.27.0": true
+  },
+  "license": "MIT"
 }

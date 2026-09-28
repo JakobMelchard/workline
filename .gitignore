@@ -1,3 +1,11 @@
 node_modules/
 package-lock.json
 types/
+.build/
+build/
+Package.resolved
+*.o
+*.a
+*.so
+*.dylib
+*.pc

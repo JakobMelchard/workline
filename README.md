@@ -7,11 +7,22 @@ spreadsheet cell. Syntax inspired by Liftoscript exercise lines.
 Bench Press / 4x5, 1x5+ @8 / 100kg 2min
 ```
 
-Spec: [`SPEC.md`](SPEC.md). Conformance cases: [`test/vectors.json`](test/vectors.json).
-This repo holds the JS reference implementation.
+One tree-sitter grammar ([`grammar.js`](grammar.js)) defines the syntax for
+every language and editor. Meaning: [`SPEC.md`](SPEC.md). Conformance cases:
+[`test/vectors.json`](test/vectors.json).
+
+| Use | How |
+|---|---|
+| JS (Node, browser, Workers, Capacitor) | `@jakobmelchard/workline`, web-tree-sitter + `workline.wasm` |
+| Go | `github.com/JakobMelchard/workline/bindings/go` (cgo) |
+| Swift | this repo as a Swift package, `TreeSitterWorkline` |
+| Kotlin / Android | KTreeSitter with this grammar |
+| Neovim | nvim-treesitter parser config pointing at this repo, `queries/` for highlights |
 
 ```js
-import { parse, expand, serialize } from '@jakobmelchard/workline'
+import { init, parse, expand, serialize } from '@jakobmelchard/workline'
+
+await init()                    // once; loads the wasm parser
 
 const { lines, errors } = parse(cell)
 const sets = expand(lines[0])   // one entry per set, defaults applied
@@ -19,5 +30,5 @@ const canonical = serialize({ lines, errors })
 ```
 
 ```sh
-npm install && npx tsc && npm test
+npm install && npm run build && npx tsc && npm test
 ```

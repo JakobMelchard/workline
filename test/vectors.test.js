@@ -2,13 +2,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { parse, serialize, expand } from '../src/index.js'
+import { init, parse, serialize, expand } from '../lib/index.js'
 
 /** @typedef {{in:string, canonical?:string, errors?:number[], lines?:{name?:string, sets:object[]}[], comment?:string}} Vector */
 /** @type {Vector[]} */
+await init()
 const vectors = JSON.parse(readFileSync(new URL('vectors.json', import.meta.url), 'utf8'))
 
-/** @param {import('../src/index.js').Parsed} p */
+/** @param {import('../lib/index.js').Parsed} p */
 const view = p => ({
   errors: p.errors.map(e => e.line),
   lines: p.lines.map(l => ({ ...(l.name ? { name: l.name } : {}), sets: expand(l) })),
