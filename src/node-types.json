@@ -1,5 +1,36 @@
 [
   {
+    "type": "defaults",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ask_weight",
+          "named": true
+        },
+        {
+          "type": "percent",
+          "named": true
+        },
+        {
+          "type": "rest",
+          "named": true
+        },
+        {
+          "type": "rpe",
+          "named": true
+        },
+        {
+          "type": "weight",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "document",
     "named": true,
     "root": true,
@@ -60,7 +91,7 @@
         "required": false,
         "types": [
           {
-            "type": "mods",
+            "type": "defaults",
             "named": true
           }
         ]

@@ -7,22 +7,30 @@
       "title": "workline",
       "scope": "source.workline",
       "path": ".",
-      "file-types": ["workline", "wl"],
+      "file-types": [
+        "workline",
+        "wl"
+      ],
       "highlights": "queries/highlights.scm"
     }
   ],
   "metadata": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license": "MIT",
     "description": "Text notation for strength sets, one exercise per line",
-    "authors": [{ "name": "lilfeelz" }],
-    "links": { "repository": "https://github.com/JakobMelchard/workline" }
+    "authors": [
+      {
+        "name": "lilfeelz"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/JakobMelchard/workline"
+    }
   },
   "bindings": {
     "c": true,
     "go": true,
     "java": false,
-    "kotlin": false,
     "node": false,
     "python": false,
     "rust": false,

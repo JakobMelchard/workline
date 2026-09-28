@@ -34,7 +34,10 @@ only covers what the syntax cannot express. In short:
   rpe `@8`, rest `90s` / `2min`, each optionally followed by `+` where the
   semantics below allow it
 
-Spaces and tabs are free between tokens, except before a suffix.
+Mods are separated by spaces or tabs: `60kg 50%`, never `60kg50%`. Only an
+`@` form may touch the token before it (`3x8@8`, legacy `3x8@60kg`), and the
+first mod after `/` needs no space. Elsewhere whitespace is free, except
+before a suffix.
 
 ## Semantics
 

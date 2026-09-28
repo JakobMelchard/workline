@@ -109,5 +109,28 @@
   { "in": "1.5x8", "errors": [0] },
   { "in": "3x8 1.5min", "errors": [0] },
   { "in": "3x8 @ 8", "errors": [0] },
-  { "in": "Bench 3x8", "errors": [0] }
+  { "in": "Bench 3x8", "errors": [0] },
+  {
+    "comment": "the first default may touch the slash; @ may touch anything",
+    "in": "Squat / 3x5 80%/3min\n3x8 60kg@8",
+    "canonical": "Squat / 3x5 80% / 3min\n3x8 60kg @8",
+    "lines": [
+      { "name": "Squat", "sets": [
+        { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 },
+        { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 },
+        { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 }
+      ] },
+      { "sets": [
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" }, "rpe": { "value": 8 } },
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" }, "rpe": { "value": 8 } },
+        { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" }, "rpe": { "value": 8 } }
+      ] }
+    ]
+  },
+  { "comment": "mods need whitespace between them", "in": "3x8 60kg50%", "errors": [0] },
+  { "in": "3x8 90s60kg", "errors": [0] },
+  { "in": "3x30s60kg", "errors": [0] },
+  { "in": "3x8+60kg", "errors": [0] },
+  { "in": "3x8?+", "errors": [0] },
+  { "in": "3x8 / 60kg90s", "errors": [0] }
 ]
