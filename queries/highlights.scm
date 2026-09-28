@@ -17,3 +17,4 @@
 
 ["/" ","] @punctuation.delimiter
 ["-"] @operator
+(times) @operator

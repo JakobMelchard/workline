@@ -25,7 +25,9 @@ export default grammar({
 
     name: _ => /[^\d\s/][^/\n]*/,
 
-    group: $ => seq(field('sets', $.number), /[xX×]/, field('target', $.target), optional($.mods)),
+    group: $ => seq(field('sets', $.number), $.times, field('target', $.target), optional($.mods)),
+
+    times: _ => /[xX×]/,
 
     target: $ => seq(
       field('min', $.number),
@@ -72,8 +74,6 @@ export default grammar({
     _gap_num: $ => alias(token(seq(/[ \t]+/, NUM)), $.number),
 
     _ask: $ => alias(token.immediate('+'), $.ask),
-
-    _gap_num: $ => alias(token(seq(/[ \t]+/, NUM)), $.number),
 
     _num_imm: $ => alias(token.immediate(NUM), $.number),
 
