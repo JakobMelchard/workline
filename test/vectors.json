@@ -26,7 +26,7 @@
   },
   {
     "in": "Squat / 1x5 80%, 1x3 100kg+ / 180s 70%",
-    "canonical": "Squat / 1x5 80%, 1x3 100kg+ / 70% 3min",
+    "canonical": "Squat / 1x5 80%, 1x3 100kg+ / 70% 3m",
     "lines": [{ "name": "Squat", "sets": [
       { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 },
       { "target": { "min": 3, "unit": "reps" }, "weight": { "value": 100, "unit": "kg", "ask": true }, "rest": 180 }
@@ -34,7 +34,7 @@
   },
   {
     "in": "1x6 90s ?+ @8, 1x6 / 2min",
-    "canonical": "1x6 ?+ @8 90s, 1x6 / 2min",
+    "canonical": "1x6 ?+ @8 90s, 1x6 / 2m",
     "lines": [{ "sets": [
       { "target": { "min": 6, "unit": "reps" }, "weight": { "ask": true }, "rpe": { "value": 8 }, "rest": 90 },
       { "target": { "min": 6, "unit": "reps" }, "rest": 120 }
@@ -54,9 +54,9 @@
     ]
   },
   {
-    "in": "1×400m 45s",
-    "canonical": "1x400m 45s",
-    "lines": [{ "sets": [{ "target": { "min": 400, "unit": "m" }, "rest": 45 }] }]
+    "in": "1×0.4KM 45s",
+    "canonical": "1x0.4km 45s",
+    "lines": [{ "sets": [{ "target": { "min": 0.4, "unit": "km" }, "rest": 45 }] }]
   },
   {
     "in": "1x5-5 20lb",
@@ -113,7 +113,7 @@
   {
     "comment": "the first default may touch the slash; @ may touch anything",
     "in": "Squat / 3x5 80%/3min\n3x8 60kg@8",
-    "canonical": "Squat / 3x5 80% / 3min\n3x8 60kg @8",
+    "canonical": "Squat / 3x5 80% / 3m\n3x8 60kg @8",
     "lines": [
       { "name": "Squat", "sets": [
         { "target": { "min": 5, "unit": "reps" }, "percent": { "value": 80 }, "rest": 180 },
@@ -132,5 +132,42 @@
   { "in": "3x30s60kg", "errors": [0] },
   { "in": "3x8+60kg", "errors": [0] },
   { "in": "3x8?+", "errors": [0] },
-  { "in": "3x8 / 60kg90s", "errors": [0] }
+  { "in": "3x8 / 60kg90s", "errors": [0] },
+  {
+    "comment": "r reps, s seconds, m minutes; min is an accepted spelling",
+    "in": "Run / 3x8r, 2x30s, 1x20m, 1x5min / 2m\nPlank / 1x1m 90S",
+    "canonical": "Run / 3x8, 2x30s, 1x20m, 1x5m / 2m\nPlank / 1x1m 90s",
+    "lines": [
+      { "name": "Run", "sets": [
+        { "target": { "min": 8, "unit": "reps" }, "rest": 120 },
+        { "target": { "min": 8, "unit": "reps" }, "rest": 120 },
+        { "target": { "min": 8, "unit": "reps" }, "rest": 120 },
+        { "target": { "min": 30, "unit": "s" }, "rest": 120 },
+        { "target": { "min": 30, "unit": "s" }, "rest": 120 },
+        { "target": { "min": 20, "unit": "min" }, "rest": 120 },
+        { "target": { "min": 5, "unit": "min" }, "rest": 120 }
+      ] },
+      { "name": "Plank", "sets": [
+        { "target": { "min": 1, "unit": "min" }, "rest": 90 }
+      ] }
+    ]
+  },
+  {
+    "comment": "rest in whole minutes or seconds",
+    "in": "3x5 150s, 3x5 180s, 3x5 3min",
+    "canonical": "3x5 150s, 3x5 3m, 3x5 3m",
+    "lines": [{ "sets": [
+      { "target": { "min": 5, "unit": "reps" }, "rest": 150 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 150 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 150 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 },
+      { "target": { "min": 5, "unit": "reps" }, "rest": 180 }
+    ] }]
+  },
+  { "comment": "r is only a target unit", "in": "3x8 90r", "errors": [0] },
+  { "in": "3x8rr", "errors": [0] }
 ]

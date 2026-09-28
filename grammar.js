@@ -30,7 +30,8 @@ export default grammar({
     target: $ => seq(
       field('min', $.number),
       optional(seq('-', field('max', $.number))),
-      optional(field('unit', alias(token.immediate(/min|km|s|m/i), $.unit))),
+      // r reps, s seconds, m minutes (min accepted), km distance
+      optional(field('unit', alias(token.immediate(/r|s|m|min|km/i), $.unit))),
       optional(field('ask', alias(token.immediate('+'), $.ask))),
     ),
 
@@ -99,7 +100,7 @@ function percent($, num) {
 
 /** @param {S} $ @param {RuleOrLiteral} num */
 function rest($, num) {
-  return seq(field('value', num), field('unit', unit($, /s|min/i)))
+  return seq(field('value', num), field('unit', unit($, /s|m|min/i)))
 }
 
 /** @param {RuleOrLiteral} rule @param {string} sep */
