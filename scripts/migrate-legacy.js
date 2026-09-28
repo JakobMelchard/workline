@@ -4,6 +4,7 @@
  * public/grammar.js) to workline. Dry run by default; see README "Legacy migration".
  *
  * Legacy line: SETSxVALUE[TYPE][@WEIGHT[UNIT]], `@` = weight, default unit kg.
+ * Legacy TYPE `m` (meters or minutes) is never auto-converted: workline `m` is minutes.
  *
  * @typedef {{sets:number, value:number, type:string, weight?:number, weightUnit?:string}} LegacyEntry
  * @typedef {{line:number, from:string, to:string}} Change
@@ -20,8 +21,23 @@ const LEFT = /^(\d+)x(\d+(?:\.\d+)?)([a-zA-Z]*)$/
 const RIGHT = /^(\d+(?:\.\d+)?)([a-zA-Z]*)$/
 const DEFAULT_UNIT = 'kg'
 
-/** legacy TYPE (lowercased) -> workline target suffix */
-const TYPES = /** @type {Record<string,string>} */ ({ '': '', s: 's', min: 'min', m: 'm', km: 'km' })
+/**
+ * legacy TYPE (lowercased) -> workline target suffix and parsed unit.
+ * `min` keeps its spelling (workline reads it as minutes) so migrated cells never
+ * contain a bare `m` target, which a rerun would have to treat as ambiguous.
+ * @type {Record<string, {suffix:string, unit:import('../lib/index.js').TargetUnit}>}
+ */
+const TYPES = {
+  '': { suffix: '', unit: 'reps' },
+  r: { suffix: '', unit: 'reps' },
+  s: { suffix: 's', unit: 's' },
+  min: { suffix: 'min', unit: 'min' },
+  km: { suffix: 'km', unit: 'km' },
+}
+/** legacy TYPEs that must never be auto-converted, with the reason */
+const AMBIGUOUS = /** @type {Record<string,string>} */ ({
+  m: 'legacy "m" is ambiguous (meters or minutes); workline "m" now means minutes, fix by hand',
+})
 /** legacy weight unit (lowercased) -> workline weight unit */
 const UNITS = /** @type {Record<string,string>} */ ({ '': DEFAULT_UNIT, kg: 'kg', kgs: 'kg', lb: 'lb', lbs: 'lb' })
 
@@ -50,9 +66,11 @@ export function parseLegacyLine(raw) {
  * @param {LegacyEntry} e @returns {{text:string} | {error:string}}
  */
 export function convertEntry(e) {
-  const type = TYPES[e.type.toLowerCase()]
+  const t = e.type.toLowerCase()
+  if (AMBIGUOUS[t]) return { error: AMBIGUOUS[t] }
+  const type = TYPES[t]
   if (type === undefined) return { error: `unknown type suffix "${e.type}"` }
-  let text = `${e.sets}x${e.value}${type}`
+  let text = `${e.sets}x${e.value}${type.suffix}`
   if (e.weight !== undefined) {
     const unit = UNITS[(e.weightUnit ?? '').toLowerCase()]
     if (unit === undefined) return { error: `unknown weight unit "${e.weightUnit}"` }
@@ -68,7 +86,7 @@ export function convertEntry(e) {
 function mismatch(l, e) {
   const g = l.groups[0]
   if (l.name || l.groups.length !== 1 || Object.keys(l.defaults).length) return 'not a single group'
-  const unit = TYPES[e.type.toLowerCase()] || 'reps'
+  const unit = TYPES[e.type.toLowerCase()]?.unit
   if (g.sets !== e.sets || g.target.min !== e.value || g.target.max !== undefined || g.target.unit !== unit) return 'target changed'
   if (g.percent || g.rpe || g.rest !== undefined) return 'unexpected mods'
   const w = e.weight === undefined ? undefined : { value: e.weight, unit: UNITS[(e.weightUnit ?? '').toLowerCase()] }
@@ -106,8 +124,10 @@ export function migrateCell(oldCell) {
       manual.push({ line, raw, reason: `workline rejects "${conv.text}": ${p.errors[0]?.reason ?? 'no line'}` })
       return raw
     }
-    const to = serializeLine(p.lines[0])
-    const bad = mismatch(p.lines[0], legacy.entry) ?? (serializeLine(parseLine(to)) === to ? undefined : 'canonical form unstable')
+    let to = serializeLine(p.lines[0])
+    // Canonical minutes are `m`; spell them `min` (see TYPES).
+    if (p.lines[0].groups[0].target.unit === 'min') to = to.replace(/^(\d+x[\d.]+)m(?=\s|$)/, '$1min')
+    const bad = mismatch(p.lines[0], legacy.entry) ?? mismatch(parseLine(to), legacy.entry) ?? (serializeLine(parseLine(to)) === serializeLine(p.lines[0]) ? undefined : 'canonical form unstable')
     if (bad) {
       manual.push({ line, raw, reason: `does not round-trip: ${bad}` })
       return raw

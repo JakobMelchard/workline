@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { init, parse } from '../lib/index.js'
+import { init, parse, expand } from '../lib/index.js'
 import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf } from '../scripts/migrate-legacy.js'
 
 await init()
@@ -35,10 +35,28 @@ test('numbers are canonicalized', () => {
   assert.equal(migrateCell('1x5@62.50').cell, '1x5 62.5kg')
 })
 
-test('time and distance types carry over', () => {
-  const r = migrateCell('2x30s\n1x2min\n1x400m\n1x1.5km@10')
-  assert.equal(r.cell, '2x30s\n1x2min\n1x400m\n1x1.5km 10kg')
-  assert.equal(r.changes.length, 1)
+test('s, min, km carry over; min keeps its spelling', () => {
+  const r = migrateCell('2x30s\n1x2min\n1x2MIN@5\n1x1.5km@10')
+  assert.equal(r.cell, '2x30s\n1x2min\n1x2min 5kg\n1x1.5km 10kg')
+  assert.equal(r.changes.length, 2)
+  assert.deepEqual(r.manual, [])
+  assert.equal(expand(parse('1x2min').lines[0])[0].target.unit, 'min')
+})
+
+test('legacy r means reps', () => {
+  const r = migrateCell('3x10r@12\n3x5R')
+  assert.equal(r.cell, '3x10 12kg\n3x5')
+  assert.deepEqual(r.changes, [
+    { line: 0, from: '3x10r@12', to: '3x10 12kg' },
+    { line: 1, from: '3x5R', to: '3x5' },
+  ])
+})
+
+test('legacy m is ambiguous and never auto-converted', () => {
+  const r = migrateCell('1x400m\n2x5m@20\n3x8@60')
+  assert.equal(r.cell, '1x400m\n2x5m@20\n3x8 60kg')
+  assert.deepEqual(r.manual.map(m => m.line), [0, 1])
+  assert.match(r.manual[0].reason, /"m" now means minutes/)
 })
 
 test('valid cells are unchanged', () => {
@@ -53,9 +71,9 @@ test('blank lines and line indexes are preserved', () => {
 })
 
 test('unknown type suffix goes to manual and stays verbatim', () => {
-  const r = migrateCell('3x10r@20\n3x8@60')
-  assert.equal(r.cell, '3x10r@20\n3x8 60kg')
-  assert.deepEqual(r.manual, [{ line: 0, raw: '3x10r@20', reason: 'unknown type suffix "r"' }])
+  const r = migrateCell('3x10x@20\n3x8@60')
+  assert.equal(r.cell, '3x10x@20\n3x8 60kg')
+  assert.deepEqual(r.manual, [{ line: 0, raw: '3x10x@20', reason: 'unknown type suffix "x"' }])
 })
 
 test('unknown weight unit goes to manual', () => {
@@ -73,7 +91,7 @@ test('lines invalid in both grammars go to manual with both reasons', () => {
 })
 
 test('lines already in workline form are kept, so migration is idempotent', () => {
-  const once = migrateCell('3x8@60\n2x30s\n3x60s@12')
+  const once = migrateCell('3x8@60\n2x30s\n3x60s@12\n1x2min@5\n3x10r')
   const twice = migrateCell(once.cell)
   assert.equal(twice.cell, once.cell)
   assert.deepEqual(twice.changes, [])
@@ -82,7 +100,7 @@ test('lines already in workline form are kept, so migration is idempotent', () =
 })
 
 test('every converted cell parses cleanly in workline', () => {
-  const { cell } = migrateCell('3x8@60\n3x8@60lb\n2x30s\n5x5@102.5\n1x1km@0')
+  const { cell } = migrateCell('3x8@60\n3x8@60lb\n2x30s\n5x5@102.5\n1x1km@0\n1x3min\n3x8r')
   assert.deepEqual(parse(cell).errors, [])
 })
 

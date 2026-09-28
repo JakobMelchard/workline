@@ -38,7 +38,8 @@ npm install && npm run build && npx tsc && npm test
 `scripts/migrate-legacy.js` converts load cells written in the old
 `JakobMelchard/workout` grammar (`3x8@60`, `@` = weight, default kg) to
 workline (`3x8 60kg`). Lines it cannot convert safely are kept verbatim and
-listed for manual fixing. See SPEC.md "Legacy input".
+listed for manual fixing, including every legacy `m` target (meters or
+minutes; workline `m` is minutes). See SPEC.md "Legacy input".
 
 ```sh
 node scripts/migrate-legacy.js cells.json          # or cells.csv, or stdin; report only

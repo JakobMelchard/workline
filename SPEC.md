@@ -95,8 +95,9 @@ v1 reads `@` as RPE. For migration:
 
 `scripts/migrate-legacy.js` applies these rules to whole cells: it parses each
 line with the legacy grammar, rewrites `@<num>[kg|lb]` as a weight (unitless
-means kg), checks the result with `parse`, and lists every line it cannot
-convert for manual fixing. Usage is in the README.
+means kg), maps legacy `r` to reps and keeps `s`, `min`, `km`, checks the
+result with `parse`, and lists every line it cannot convert for manual fixing.
+Legacy `m` is always listed, never converted. Usage is in the README.
 
 ## Not in v1
 
