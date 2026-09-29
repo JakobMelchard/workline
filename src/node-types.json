@@ -52,7 +52,7 @@
     "fields": {
       "sets": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "number",
@@ -73,7 +73,7 @@
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "mods",
@@ -232,7 +232,7 @@
     }
   },
   {
-    "type": "target",
+    "type": "step",
     "named": true,
     "fields": {
       "ask": {
@@ -271,6 +271,22 @@
         "types": [
           {
             "type": "unit",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "target",
+    "named": true,
+    "fields": {
+      "step": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "step",
             "named": true
           }
         ]
@@ -360,5 +376,9 @@
   {
     "type": "unit",
     "named": true
+  },
+  {
+    "type": "|",
+    "named": false
   }
 ]

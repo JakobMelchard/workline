@@ -47,10 +47,12 @@ type Mods struct {
 	Rest    *int    `json:"rest,omitempty"`
 }
 
-// Group is SETS x TARGET plus its own mods.
+// Group is SETS x TARGET plus its own mods. Weeks holds one target per week
+// of a block when the target has "|" steps ("8|6|4"); Target is Weeks[0].
 type Group struct {
-	Sets   int    `json:"sets"`
-	Target Target `json:"target"`
+	Sets   int      `json:"sets"`
+	Target Target   `json:"target"`
+	Weeks  []Target `json:"weeks,omitempty"`
 	Mods
 }
 
@@ -188,11 +190,10 @@ func (p *lineParser) syntaxError(n *sitter.Node) string {
 }
 
 func (p *lineParser) group(g *sitter.Node) (Group, error) {
-	setsNode, err := field(g, "sets")
-	if err != nil {
-		return Group{}, err
+	sets := 1.0
+	if n := g.ChildByFieldName("sets"); n != nil {
+		sets = p.num(n)
 	}
-	sets := p.num(setsNode)
 	if sets != math.Trunc(sets) || sets < 1 || sets > math.MaxInt32 {
 		return Group{}, errf("sets must be a whole number >= 1: %s", jsNum(sets))
 	}
@@ -200,31 +201,41 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	if err != nil {
 		return Group{}, err
 	}
-	minNode, err := field(t, "min")
-	if err != nil {
-		return Group{}, err
-	}
-	target := Target{Min: p.num(minNode), Unit: "reps"}
-	if u := t.ChildByFieldName("unit"); u != nil {
-		unit, ok := targetUnits[strings.ToLower(p.text(u))]
+	steps := t.ChildrenByFieldName("step", t.Walk())
+	// A step without a unit takes the unit the other steps name; they must agree.
+	unit := ""
+	for _, st := range steps {
+		u := st.ChildByFieldName("unit")
+		if u == nil {
+			continue
+		}
+		name, ok := targetUnits[strings.ToLower(p.text(u))]
 		if !ok {
 			return Group{}, errf("unknown target unit %q", p.text(u))
 		}
-		target.Unit = unit
-	}
-	if maxNode := t.ChildByFieldName("max"); maxNode != nil {
-		max := p.num(maxNode)
-		if max < target.Min {
-			return Group{}, errf("range %s-%s is descending", jsNum(target.Min), jsNum(max))
+		if unit != "" && unit != name {
+			return Group{}, errf("week steps mix units: %s, %s", unit, name)
 		}
-		if max != target.Min {
-			target.Max = &max
+		unit = name
+	}
+	if unit == "" {
+		unit = "reps"
+	}
+	var weeks []Target
+	for i := range steps {
+		target, err := p.step(&steps[i], unit)
+		if err != nil {
+			return Group{}, err
 		}
+		weeks = append(weeks, target)
 	}
-	if t.ChildByFieldName("ask") != nil {
-		target.Amrap = true
+	if len(weeks) == 0 {
+		return Group{}, errf("missing target")
 	}
-	group := Group{Sets: int(sets), Target: target}
+	group := Group{Sets: int(sets), Target: weeks[0]}
+	if len(weeks) > 1 {
+		group.Weeks = weeks
+	}
 	if m := firstKid(g, "mods"); m != nil {
 		mods, err := p.mods(m)
 		if err != nil {
@@ -233,6 +244,27 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 		group.Mods = mods
 	}
 	return group, nil
+}
+
+func (p *lineParser) step(t *sitter.Node, unit string) (Target, error) {
+	minNode, err := field(t, "min")
+	if err != nil {
+		return Target{}, err
+	}
+	target := Target{Min: p.num(minNode), Unit: unit}
+	if maxNode := t.ChildByFieldName("max"); maxNode != nil {
+		max := p.num(maxNode)
+		if max < target.Min {
+			return Target{}, errf("range %s-%s is descending", jsNum(target.Min), jsNum(max))
+		}
+		if max != target.Min {
+			target.Max = &max
+		}
+	}
+	if t.ChildByFieldName("ask") != nil {
+		target.Amrap = true
+	}
+	return target, nil
 }
 
 func (p *lineParser) mods(node *sitter.Node) (Mods, error) {
@@ -302,8 +334,8 @@ func (p *lineParser) mods(node *sitter.Node) (Mods, error) {
 				return Mods{}, err
 			}
 			secs := int(value)
-			if strings.ToLower(p.text(u)) != "s" {
-				secs *= 60 // "m" or "min"
+			if targetUnits[strings.ToLower(p.text(u))] != "s" {
+				secs *= 60 // "m", "min" or "'"
 			}
 			if err := claim("rest"); err != nil {
 				return Mods{}, err
@@ -323,8 +355,9 @@ func (p *lineParser) num(n *sitter.Node) float64 {
 	return v
 }
 
-// targetUnits maps target suffixes to JSON unit names: "m" and "min" are minutes.
-var targetUnits = map[string]string{"r": "reps", "s": "s", "m": "min", "min": "min", "km": "km"}
+// targetUnits maps target suffixes to JSON unit names: "m", "min" and "'"
+// are minutes, "''" seconds.
+var targetUnits = map[string]string{"r": "reps", "s": "s", "m": "min", "min": "min", "km": "km", "'": "min", "''": "s"}
 
 // unitSuffix is the canonical target suffix per unit; reps has none.
 var unitSuffix = map[string]string{"reps": "", "s": "s", "min": "m", "km": "km"}
@@ -355,12 +388,20 @@ func firstKid(n *sitter.Node, kind string) *sitter.Node {
 
 // Expand returns one SetSpec per set, in order, with the line's defaults
 // applied. A group's own mod wins; weight and percent count as one kind.
-func Expand(line Line) []SetSpec {
+// Week steps take their first step; see ExpandWeek.
+func Expand(line Line) []SetSpec { return ExpandWeek(line, 1) }
+
+// ExpandWeek is Expand for week (1-based) of a block: each group's target is
+// its week's step, and past the last step the last one repeats.
+func ExpandWeek(line Line, week int) []SetSpec {
 	d := line.Defaults
 	out := []SetSpec{}
 	for _, g := range line.Groups {
 		var s SetSpec
 		s.Target = g.Target
+		if len(g.Weeks) > 0 {
+			s.Target = g.Weeks[min(max(week, 1), len(g.Weeks))-1]
+		}
 		weight, percent := g.Weight, g.Percent
 		if weight == nil && g.Percent == nil {
 			weight = d.Weight
@@ -440,7 +481,14 @@ func Serialize(parsed Parsed) string {
 func SerializeLine(line Line) string {
 	groups := make([]string, len(line.Groups))
 	for i, g := range line.Groups {
-		groups[i] = strings.Join(append([]string{strconv.Itoa(g.Sets) + "x" + g.Target.String()}, SerializeMods(g.Mods)...), " ")
+		steps := []string{g.Target.String()}
+		if len(g.Weeks) > 0 {
+			steps = steps[:0]
+			for _, t := range g.Weeks {
+				steps = append(steps, t.String())
+			}
+		}
+		groups[i] = strings.Join(append([]string{strconv.Itoa(g.Sets) + "x" + strings.Join(steps, "|")}, SerializeMods(g.Mods)...), " ")
 	}
 	var b strings.Builder
 	if line.Name != "" {

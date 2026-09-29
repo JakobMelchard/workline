@@ -169,5 +169,103 @@
     ] }]
   },
   { "comment": "r is only a target unit", "in": "3x8 90r", "errors": [0] },
-  { "in": "3x8rr", "errors": [0] }
+  { "in": "3x8rr", "errors": [0] },
+  {
+    "comment": "week steps: week 1 (default) takes the first step",
+    "in": "3 x 8|6|4|2+",
+    "canonical": "3x8|6|4|2+",
+    "lines": [{ "sets": [
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } }
+    ] }]
+  },
+  {
+    "comment": "week steps: week 4 takes the fourth, + marks only that step",
+    "in": "3 x 8|6|4|2+",
+    "week": 4,
+    "canonical": "3x8|6|4|2+",
+    "lines": [{ "sets": [
+      { "target": { "min": 2, "unit": "reps", "amrap": true } },
+      { "target": { "min": 2, "unit": "reps", "amrap": true } },
+      { "target": { "min": 2, "unit": "reps", "amrap": true } }
+    ] }]
+  },
+  {
+    "comment": "week steps: past the last step the last one repeats",
+    "in": "3 x 8|6|4|2+",
+    "week": 6,
+    "canonical": "3x8|6|4|2+",
+    "lines": [{ "sets": [
+      { "target": { "min": 2, "unit": "reps", "amrap": true } },
+      { "target": { "min": 2, "unit": "reps", "amrap": true } },
+      { "target": { "min": 2, "unit": "reps", "amrap": true } }
+    ] }]
+  },
+  {
+    "comment": "week steps with ranges and mods",
+    "in": "4x8-12|6-10 @8 / 60kg",
+    "week": 2,
+    "canonical": "4x8-12|6-10 @8 / 60kg",
+    "lines": [{ "sets": [
+      { "target": { "min": 6, "max": 10, "unit": "reps" }, "rpe": { "value": 8 }, "weight": { "value": 60, "unit": "kg" } },
+      { "target": { "min": 6, "max": 10, "unit": "reps" }, "rpe": { "value": 8 }, "weight": { "value": 60, "unit": "kg" } },
+      { "target": { "min": 6, "max": 10, "unit": "reps" }, "rpe": { "value": 8 }, "weight": { "value": 60, "unit": "kg" } },
+      { "target": { "min": 6, "max": 10, "unit": "reps" }, "rpe": { "value": 8 }, "weight": { "value": 60, "unit": "kg" } }
+    ] }]
+  },
+  {
+    "comment": "week steps: a step without a unit takes the named one",
+    "in": "30|45|60s",
+    "week": 2,
+    "canonical": "1x30s|45s|60s",
+    "lines": [{ "sets": [
+      { "target": { "min": 45, "unit": "s" } }
+    ] }]
+  },
+  {
+    "comment": "week steps may not mix units",
+    "in": "3x8r|6s",
+    "errors": [0]
+  },
+  {
+    "comment": "sets may be left out for one set; ' is minutes",
+    "in": "90-150'",
+    "canonical": "1x90-150m",
+    "lines": [{ "sets": [
+      { "target": { "min": 90, "max": 150, "unit": "min" } }
+    ] }]
+  },
+  {
+    "comment": "'' is seconds",
+    "in": "3 x 5-10''",
+    "canonical": "3x5-10s",
+    "lines": [{ "sets": [
+      { "target": { "min": 5, "max": 10, "unit": "s" } },
+      { "target": { "min": 5, "max": 10, "unit": "s" } },
+      { "target": { "min": 5, "max": 10, "unit": "s" } }
+    ] }]
+  },
+  {
+    "comment": "' and '' rest",
+    "in": "3x5 100kg 2'\n1x45s 90''",
+    "canonical": "3x5 100kg 2m\n1x45s 90s",
+    "lines": [{ "sets": [
+      { "target": { "min": 5, "unit": "reps" }, "weight": { "value": 100, "unit": "kg" }, "rest": 120 },
+      { "target": { "min": 5, "unit": "reps" }, "weight": { "value": 100, "unit": "kg" }, "rest": 120 },
+      { "target": { "min": 5, "unit": "reps" }, "weight": { "value": 100, "unit": "kg" }, "rest": 120 }
+    ] }, { "sets": [
+      { "target": { "min": 45, "unit": "s" }, "rest": 90 }
+    ] }]
+  },
+  {
+    "comment": "set ranges are not workline",
+    "in": "3-4 x 8-9",
+    "errors": [0]
+  },
+  {
+    "comment": "nested intervals are not workline",
+    "in": "30-45' (4-6 x 15'' 90%)",
+    "errors": [0]
+  }
 ]

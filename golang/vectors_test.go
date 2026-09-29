@@ -12,6 +12,7 @@ import (
 // Conformance: runs test/vectors.json exactly like test/vectors.test.js.
 type vector struct {
 	In        string          `json:"in"`
+	Week      int             `json:"week"`
 	Canonical *string         `json:"canonical"`
 	Errors    []int           `json:"errors"`
 	Lines     json.RawMessage `json:"lines"`
@@ -28,13 +29,13 @@ type view struct {
 	Lines  []viewLine `json:"lines"`
 }
 
-func viewOf(p workline.Parsed) view {
+func viewOf(p workline.Parsed, week int) view {
 	v := view{Errors: []int{}, Lines: []viewLine{}}
 	for _, e := range p.Errors {
 		v.Errors = append(v.Errors, e.Line)
 	}
 	for _, l := range p.Lines {
-		v.Lines = append(v.Lines, viewLine{Name: l.Name, Sets: workline.Expand(l)})
+		v.Lines = append(v.Lines, viewLine{Name: l.Name, Sets: workline.ExpandWeek(l, week)})
 	}
 	return v
 }
@@ -84,7 +85,7 @@ func TestVectors(t *testing.T) {
 				}
 			}
 			want := generic(t, map[string]any{"errors": wantErrors, "lines": wantLines})
-			got := generic(t, viewOf(p))
+			got := generic(t, viewOf(p, vec.Week))
 			if !reflect.DeepEqual(got, want) {
 				gj, _ := json.Marshal(got)
 				wj, _ := json.Marshal(want)
@@ -112,7 +113,7 @@ func TestVectors(t *testing.T) {
 			if !reflect.DeepEqual(raws(again), raws(p)) {
 				t.Fatalf("reparse errors %q, want %q", raws(again), raws(p))
 			}
-			if !reflect.DeepEqual(generic(t, viewOf(again).Lines), generic(t, viewOf(p).Lines)) {
+			if !reflect.DeepEqual(generic(t, viewOf(again, vec.Week).Lines), generic(t, viewOf(p, vec.Week).Lines)) {
 				t.Fatal("parse(serialize(x)) changed meaning")
 			}
 			if s := workline.Serialize(again); s != out {
