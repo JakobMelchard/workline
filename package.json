@@ -1,6 +1,6 @@
 {
   "name": "@jakobmelchard/workline",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "type": "module",
   "exports": {
     ".": {
@@ -25,7 +25,7 @@
     "web-tree-sitter.wasm"
   ],
   "scripts": {
-    "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm && cp node_modules/web-tree-sitter/web-tree-sitter.wasm .",
+    "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm && cp node_modules/web-tree-sitter/web-tree-sitter.wasm . && node scripts/parser-sum.js",
     "prepare": "tsc -p tsconfig.build.json",
     "check": "tsc",
     "test": "node --test \"test/*.test.js\""

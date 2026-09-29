@@ -25,16 +25,29 @@ export default grammar({
 
     name: _ => /[^\d\s/][^/\n]*/,
 
-    group: $ => seq(field('sets', $.number), $.times, field('target', $.target), optional($.mods)),
+    // "SETS x" may be left out for one set: "90-150'" is "1x90-150m".
+    group: $ => seq(
+      optional(seq(field('sets', $.number), $.times)),
+      field('target', $.target),
+      optional($.mods),
+    ),
 
     times: _ => /[xX×]/,
 
+    // One step per week of a block, "|" separated: "8|6|4|2+" is 8 reps in
+    // week 1, 6 in week 2 and so on. A single step is the same every week.
+    // A trailing "+" marks the whole target, every week.
     target: $ => seq(
+      sep1(field('step', $.step), '|'),
+      optional(field('ask', alias(token.immediate('+'), $.ask))),
+    ),
+
+    step: $ => seq(
       field('min', $.number),
       optional(seq('-', field('max', $.number))),
-      // r reps, s seconds, m minutes (min accepted), km distance
-      optional(field('unit', alias(token.immediate(/r|s|m|min|km/i), $.unit))),
-      optional(field('ask', alias(token.immediate('+'), $.ask))),
+      // r reps, s seconds, m minutes, km distance; min and ' also minutes,
+      // '' also seconds
+      optional(field('unit', alias(token.immediate(/r|s|m|min|km|'|''/i), $.unit))),
     ),
 
     // Each mod needs whitespace before it; only "@" forms may touch the previous
@@ -100,7 +113,7 @@ function percent($, num) {
 
 /** @param {S} $ @param {RuleOrLiteral} num */
 function rest($, num) {
-  return seq(field('value', num), field('unit', unit($, /s|m|min/i)))
+  return seq(field('value', num), field('unit', unit($, /s|m|min|'|''/i)))
 }
 
 /** @param {RuleOrLiteral} rule @param {string} sep */

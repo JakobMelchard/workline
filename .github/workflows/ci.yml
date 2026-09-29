@@ -10,7 +10,7 @@ jobs:
       check-cmd: npx tsc
       # Regenerate from grammar.js: committed parser sources must match, and
       # the vectors run against the freshly built wasm.
-      test-cmd: npm run build && git diff --exit-code -- src/ && npm test
+      test-cmd: npm run build && git diff --exit-code -- src/ bindings/go/parser_sum.go && npm test
   go:
     uses: JakobMelchard/.github/.github/workflows/go.yml@main
   hooks:

@@ -52,7 +52,7 @@
     "fields": {
       "sets": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "number",
@@ -73,7 +73,7 @@
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "mods",
@@ -232,19 +232,9 @@
     }
   },
   {
-    "type": "target",
+    "type": "step",
     "named": true,
     "fields": {
-      "ask": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "ask",
-            "named": true
-          }
-        ]
-      },
       "max": {
         "multiple": false,
         "required": false,
@@ -271,6 +261,32 @@
         "types": [
           {
             "type": "unit",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "target",
+    "named": true,
+    "fields": {
+      "ask": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "ask",
+            "named": true
+          }
+        ]
+      },
+      "step": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "step",
             "named": true
           }
         ]
@@ -360,5 +376,9 @@
   {
     "type": "unit",
     "named": true
+  },
+  {
+    "type": "|",
+    "named": false
   }
 ]

@@ -19,6 +19,9 @@ Squat / 3x5 80% / 3m        last section applies to every group
 3x30s                       timed sets
 1x20m @7+                   20 minutes, RPE logged
 1x2km                       distance set
+3 x 8|6|4|2+                week 1: 3x8+, week 2: 3x6+, ..., week 4: 3x2+
+90-150'                     one set of 90-150 minutes
+3 x 5-10''                  seconds
 ```
 
 ## Syntax
@@ -29,12 +32,14 @@ only covers what the syntax cannot express. In short:
 
 - `line = [name "/"] group {"," group} ["/" mods]`, one per text line
 - `name` is any text before the first `/` that does not start with a digit
-- `group = SETS x TARGET [mods]`, `x` also `X` or `×`
-- `TARGET = N[-N][r|s|m|km][+]`: `r` reps (the default when omitted), `s`
-  seconds, `m` minutes, `km` kilometers. `min` is accepted for `m`.
-  Suffixes are written with no space before them
+- `group = [SETS x] TARGET [mods]`, `x` also `X` or `×`; without `SETS x`
+  it is one set
+- `TARGET = STEP {"|" STEP} [+]`, one step per week of a block
+- `STEP = N[-N][r|s|m|km]`: `r` reps (the default when omitted), `s`
+  seconds, `m` minutes, `km` kilometers. `min` and `'` are accepted for `m`,
+  `''` for `s`. Suffixes are written with no space before them
 - `mods` in any order: weight `60kg` / `135lb` / `?+`, percent `80%`,
-  rpe `@8`, rest `90s` / `2m` (`min` accepted), each optionally followed by `+` where the
+  rpe `@8`, rest `90s` / `2m` (`min` and `'` accepted for `m`, `''` for `s`), each optionally followed by `+` where the
   semantics below allow it
 
 Mods are separated by spaces or tabs: `60kg 50%`, never `60kg50%`. Only an
@@ -44,10 +49,17 @@ before a suffix.
 
 ## Semantics
 
-- **sets**: a whole number >= 1.
+- **sets**: a whole number >= 1; 1 when left out. There are no set ranges:
+  `3-4 x 8` is an error.
 - **target**: the reps (or seconds, minutes, kilometers) per set.
   `8-12` is a range, `min <= max`. A trailing `+` marks it as logged:
   AMRAP for reps, "as long as possible" for time and distance.
+- **week steps**: `8|6|4|2+` is the target of week 1, 2, 3 and 4 of a block.
+  Each step has its own range; a trailing `+` marks every step (`8+|6` is an
+  error). A step without a
+  unit takes the unit the other steps name, and explicit units must agree
+  (`30|45|60s` is seconds; `8r|6s` errors). Expanding for a week past the
+  last step repeats the last step; without a week, week 1.
 - **weight**: absolute load. `+` means the lifter confirms or edits it while
   logging. `?+` means no prescribed weight, ask for it.
 - **percent**: percentage of 1RM, `0 < value <= 200`. `+` as for weight.
@@ -57,7 +69,8 @@ before a suffix.
 - The trailing `/ mods` section is the line's defaults. A group's own mod wins
   over the default of the same kind; weight and percent count as one kind.
 
-Expanding a line yields one entry per set with defaults applied, in order.
+Expanding a line for a week (default 1) yields one entry per set with
+defaults applied, in order.
 
 ## Errors
 
@@ -71,9 +84,10 @@ Serializing produces:
 
 - `name / ` prefix when named, name trimmed, inner whitespace collapsed
 - groups joined by `, `
-- inside a group: `SETSxTARGET`, then weight or percent, then rpe, then rest,
+- inside a group: `SETSxTARGET` (sets always written, steps joined by `|`,
+  each with its unit), then weight or percent, then rpe, then rest,
   separated by one space
-- targets in reps without `r`, minutes as `m`
+- targets in reps without `r`, minutes as `m`, seconds as `s` (never `'`/`''`)
 - rest as `Nm` when a whole number of minutes, else `Ns`
 - numbers without trailing zeros (`62.5`, `60`)
 - defaults as ` / mods` in the same mod order, omitted when empty
@@ -101,6 +115,6 @@ Legacy `m` is always listed, never converted. Usage is in the README.
 
 ## Not in v1
 
-Program structure (weeks, days, reuse), progression scripts, warmups,
+Program structure (days, reuse) beyond week steps, progression scripts, warmups,
 supersets, tags and notes. Tags and notes live in their own spreadsheet
 columns until a consumer needs them inline.
