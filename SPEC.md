@@ -19,7 +19,7 @@ Squat / 3x5 80% / 3m        last section applies to every group
 3x30s                       timed sets
 1x20m @7+                   20 minutes, RPE logged
 1x2km                       distance set
-3 x 8|6|4|2+                week 1: 3x8, week 2: 3x6, ..., week 4: 3x2+
+3 x 8|6|4|2+                week 1: 3x8+, week 2: 3x6+, ..., week 4: 3x2+
 90-150'                     one set of 90-150 minutes
 3 x 5-10''                  seconds
 ```
@@ -34,8 +34,8 @@ only covers what the syntax cannot express. In short:
 - `name` is any text before the first `/` that does not start with a digit
 - `group = [SETS x] TARGET [mods]`, `x` also `X` or `×`; without `SETS x`
   it is one set
-- `TARGET = STEP {"|" STEP}`, one step per week of a block
-- `STEP = N[-N][r|s|m|km][+]`: `r` reps (the default when omitted), `s`
+- `TARGET = STEP {"|" STEP} [+]`, one step per week of a block
+- `STEP = N[-N][r|s|m|km]`: `r` reps (the default when omitted), `s`
   seconds, `m` minutes, `km` kilometers. `min` and `'` are accepted for `m`,
   `''` for `s`. Suffixes are written with no space before them
 - `mods` in any order: weight `60kg` / `135lb` / `?+`, percent `80%`,
@@ -55,7 +55,8 @@ before a suffix.
   `8-12` is a range, `min <= max`. A trailing `+` marks it as logged:
   AMRAP for reps, "as long as possible" for time and distance.
 - **week steps**: `8|6|4|2+` is the target of week 1, 2, 3 and 4 of a block.
-  Each step is a full target with its own range and `+`. A step without a
+  Each step has its own range; a trailing `+` marks every step (`8+|6` is an
+  error). A step without a
   unit takes the unit the other steps name, and explicit units must agree
   (`30|45|60s` is seconds; `8r|6s` errors). Expanding for a week past the
   last step repeats the last step; without a week, week 1.

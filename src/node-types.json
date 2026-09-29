@@ -235,16 +235,6 @@
     "type": "step",
     "named": true,
     "fields": {
-      "ask": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "ask",
-            "named": true
-          }
-        ]
-      },
       "max": {
         "multiple": false,
         "required": false,
@@ -281,6 +271,16 @@
     "type": "target",
     "named": true,
     "fields": {
+      "ask": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "ask",
+            "named": true
+          }
+        ]
+      },
       "step": {
         "multiple": true,
         "required": true,

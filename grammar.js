@@ -36,7 +36,11 @@ export default grammar({
 
     // One step per week of a block, "|" separated: "8|6|4|2+" is 8 reps in
     // week 1, 6 in week 2 and so on. A single step is the same every week.
-    target: $ => sep1(field('step', $.step), '|'),
+    // A trailing "+" marks the whole target, every week.
+    target: $ => seq(
+      sep1(field('step', $.step), '|'),
+      optional(field('ask', alias(token.immediate('+'), $.ask))),
+    ),
 
     step: $ => seq(
       field('min', $.number),
@@ -44,7 +48,6 @@ export default grammar({
       // r reps, s seconds, m minutes, km distance; min and ' also minutes,
       // '' also seconds
       optional(field('unit', alias(token.immediate(/r|s|m|min|km|'|''/i), $.unit))),
-      optional(field('ask', alias(token.immediate('+'), $.ask))),
     ),
 
     // Each mod needs whitespace before it; only "@" forms may touch the previous

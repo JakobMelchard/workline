@@ -171,17 +171,17 @@
   { "comment": "r is only a target unit", "in": "3x8 90r", "errors": [0] },
   { "in": "3x8rr", "errors": [0] },
   {
-    "comment": "week steps: week 1 (default) takes the first step",
+    "comment": "week steps: week 1 (default) takes the first step; the trailing + marks every week",
     "in": "3 x 8|6|4|2+",
     "canonical": "3x8|6|4|2+",
     "lines": [{ "sets": [
-      { "target": { "min": 8, "unit": "reps" } },
-      { "target": { "min": 8, "unit": "reps" } },
-      { "target": { "min": 8, "unit": "reps" } }
+      { "target": { "min": 8, "unit": "reps", "amrap": true } },
+      { "target": { "min": 8, "unit": "reps", "amrap": true } },
+      { "target": { "min": 8, "unit": "reps", "amrap": true } }
     ] }]
   },
   {
-    "comment": "week steps: week 4 takes the fourth, + marks only that step",
+    "comment": "week steps: week 4 takes the fourth",
     "in": "3 x 8|6|4|2+",
     "week": 4,
     "canonical": "3x8|6|4|2+",
@@ -222,6 +222,19 @@
     "lines": [{ "sets": [
       { "target": { "min": 45, "unit": "s" } }
     ] }]
+  },
+  {
+    "comment": "week steps: without + no week is AMRAP",
+    "in": "1x8|6|4",
+    "week": 3,
+    "lines": [{ "sets": [
+      { "target": { "min": 4, "unit": "reps" } }
+    ] }]
+  },
+  {
+    "comment": "week steps: + only after the last step",
+    "in": "3x8+|6",
+    "errors": [0]
   },
   {
     "comment": "week steps may not mix units",

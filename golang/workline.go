@@ -201,6 +201,7 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	if err != nil {
 		return Group{}, err
 	}
+	amrap := t.ChildByFieldName("ask") != nil
 	steps := t.ChildrenByFieldName("step", t.Walk())
 	// A step without a unit takes the unit the other steps name; they must agree.
 	unit := ""
@@ -223,7 +224,7 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	}
 	var weeks []Target
 	for i := range steps {
-		target, err := p.step(&steps[i], unit)
+		target, err := p.step(&steps[i], unit, amrap)
 		if err != nil {
 			return Group{}, err
 		}
@@ -246,7 +247,7 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	return group, nil
 }
 
-func (p *lineParser) step(t *sitter.Node, unit string) (Target, error) {
+func (p *lineParser) step(t *sitter.Node, unit string, amrap bool) (Target, error) {
 	minNode, err := field(t, "min")
 	if err != nil {
 		return Target{}, err
@@ -261,9 +262,7 @@ func (p *lineParser) step(t *sitter.Node, unit string) (Target, error) {
 			target.Max = &max
 		}
 	}
-	if t.ChildByFieldName("ask") != nil {
-		target.Amrap = true
-	}
+	target.Amrap = amrap
 	return target, nil
 }
 
@@ -481,14 +480,19 @@ func Serialize(parsed Parsed) string {
 func SerializeLine(line Line) string {
 	groups := make([]string, len(line.Groups))
 	for i, g := range line.Groups {
-		steps := []string{g.Target.String()}
+		target := g.Target.String()
 		if len(g.Weeks) > 0 {
-			steps = steps[:0]
-			for _, t := range g.Weeks {
-				steps = append(steps, t.String())
+			steps := make([]string, len(g.Weeks))
+			for j, t := range g.Weeks {
+				t.Amrap = false
+				steps[j] = t.String()
+			}
+			target = strings.Join(steps, "|")
+			if g.Target.Amrap {
+				target += "+"
 			}
 		}
-		groups[i] = strings.Join(append([]string{strconv.Itoa(g.Sets) + "x" + strings.Join(steps, "|")}, SerializeMods(g.Mods)...), " ")
+		groups[i] = strings.Join(append([]string{strconv.Itoa(g.Sets) + "x" + target}, SerializeMods(g.Mods)...), " ")
 	}
 	var b strings.Builder
 	if line.Name != "" {
