@@ -45,6 +45,8 @@ swift build
   its public docs only, never its grammar files or source.
 - Serialize keeps error lines verbatim so a bad cell survives a round trip
   through an app untouched.
+- `tree-sitter init -u` appends another `let dir = Context.packageDirectory`
+  to `Package.swift` each run; keep exactly one or `swift build` fails.
 - The grammar is ABI 15, so `go.mod` needs go-tree-sitter >= v0.25.0; older
   versions load the language but every parse fails. Keep that after `init -u`.
 - cgo does not track `src/parser.c` (bindings/go `#include`s it from outside the
