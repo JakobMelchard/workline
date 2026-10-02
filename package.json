@@ -31,9 +31,9 @@
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
-    "@jakobmelchard/config": "^1.1.0",
-    "@types/node": "^22",
-    "typescript": "^5",
+    "@jakobmelchard/config": "1.1.0",
+    "@types/node": "22.20.4",
+    "typescript": "5.9.3",
     "tree-sitter-cli": "0.27.0"
   },
   "dependencies": {
