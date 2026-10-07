@@ -2,19 +2,16 @@ name: ci
 on: { push: { branches: [main] }, pull_request: {} }
 jobs:
   js:
-    uses: JakobMelchard/.github/.github/workflows/node.yml@main
+    uses: JakobMelchard/.github/.github/workflows/node.yml@bfaa9063ee9c867b43abdad960504803ac847aa0 # v1.3.0
     with:
-      # No committed lockfile, so npm ci would fail.
-      install-cmd: npm install
-      lint-cmd: ""
       check-cmd: npx tsc
       # Regenerate from grammar.js: committed parser sources must match, and
       # the vectors run against the freshly built wasm.
       test-cmd: npm run build && git diff --exit-code -- src/ bindings/go/parser_sum.go && npm test
   go:
-    uses: JakobMelchard/.github/.github/workflows/go.yml@main
+    uses: JakobMelchard/.github/.github/workflows/go.yml@bfaa9063ee9c867b43abdad960504803ac847aa0 # v1.3.0
   hooks:
-    uses: JakobMelchard/.github/.github/workflows/hooks.yml@main
+    uses: JakobMelchard/.github/.github/workflows/hooks.yml@bfaa9063ee9c867b43abdad960504803ac847aa0 # v1.3.0
     with:
       # tsc and npm test run in the js job above
       skip: tsc,test

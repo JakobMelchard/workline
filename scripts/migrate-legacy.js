@@ -14,6 +14,7 @@
 
 import { readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { parseArgs } from 'node:util'
 import { init, parse, parseLine, serializeLine } from '../lib/index.js'
 
 // Rules copied from the legacy grammar.js.
@@ -49,7 +50,7 @@ export function parseLegacyLine(raw) {
   const s = raw.trim()
   const at = s.indexOf('@')
   const l = LEFT.exec(at < 0 ? s : s.slice(0, at))
-  if (!l) return { error: 'bad sets×value' }
+  if (!l) return { error: 'bad setsxvalue' }
   /** @type {LegacyEntry} */
   const entry = { sets: +l[1], value: +l[2], type: l[3] }
   if (at >= 0) {
@@ -154,17 +155,27 @@ export function parseCsv(text) {
   for (let i = 0; i < text.length; i++) {
     const c = text[i]
     if (q) {
-      if (c === '"' && text[i + 1] === '"') (f += '"'), i++
-      else if (c === '"') q = false
+      if (c === '"' && text[i + 1] === '"') {
+        f += '"'
+        i++
+      } else if (c === '"') q = false
       else f += c
     } else if (c === '"') q = true
-    else if (c === ',') row.push(f), (f = '')
-    else if (c === '\n' || c === '\r') {
+    else if (c === ',') {
+      row.push(f)
+      f = ''
+    } else if (c === '\n' || c === '\r') {
       if (c === '\r' && text[i + 1] === '\n') i++
-      row.push(f), rows.push(row), (row = []), (f = '')
+      row.push(f)
+      rows.push(row)
+      row = []
+      f = ''
     } else f += c
   }
-  if (f || row.length) row.push(f), rows.push(row)
+  if (f || row.length) {
+    row.push(f)
+    rows.push(row)
+  }
   return rows
 }
 
@@ -239,6 +250,7 @@ export async function accessToken(saJson, scope) {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${sig}` }),
+    signal: AbortSignal.timeout(30e3),
   })
   if (!res.ok) throw new Error(`token: HTTP ${res.status} ${await res.text()}`)
   return (await res.json()).access_token
@@ -252,9 +264,10 @@ export function sheetsClient(sheetId, token, write = false) {
   /** @param {string} path @param {RequestInit} [init] */
   const call = async (path, init = {}) => {
     if ((init.method ?? 'GET') !== 'GET' && !write) throw new Error('refusing to write: client is read-only')
-    const res = await fetch(`${API}/${sheetId}${path}`, {
+    const res = await fetch(`${API}/${encodeURIComponent(sheetId)}${path}`, {
       ...init,
       headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      signal: AbortSignal.timeout(30e3),
     })
     if (!res.ok) throw Object.assign(new Error(`sheets ${path.split('?')[0]}: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`), { status: res.status })
     return res.json()
@@ -326,18 +339,20 @@ const USAGE = `usage: migrate-legacy.js [file.json|file.csv|-] [--sheet ID [--ta
 
 /** @param {string[]} argv */
 async function main(argv) {
-  /** @type {{sheet?:string, tabs:string[], write:boolean, json:boolean, file?:string}} */
-  const o = { tabs: [], write: false, json: false }
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i]
-    if (a === '--sheet') o.sheet = argv[++i]
-    else if (a === '--tab') o.tabs.push(argv[++i])
-    else if (a === '--write') o.write = true
-    else if (a === '--json') o.json = true
-    else if (a === '-h' || a === '--help') return void console.log(USAGE)
-    else if (!a.startsWith('--') && !o.file) o.file = a
-    else throw new Error(`unknown argument ${a}\n${USAGE}`)
-  }
+  const { values: v, positionals: [file, ...extra] } = parseArgs({
+    args: argv,
+    allowPositionals: true,
+    options: {
+      sheet: { type: 'string' },
+      tab: { type: 'string', multiple: true, default: [] },
+      write: { type: 'boolean', default: false },
+      json: { type: 'boolean', default: false },
+      help: { type: 'boolean', short: 'h' },
+    },
+  })
+  if (v.help) return void console.log(USAGE)
+  if (extra.length) throw new Error(`unknown argument ${extra[0]}\n${USAGE}`)
+  const o = { sheet: v.sheet, tabs: v.tab, write: v.write, json: v.json, file }
   await init()
 
   if (!o.sheet) {

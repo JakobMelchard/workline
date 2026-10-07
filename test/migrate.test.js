@@ -11,9 +11,9 @@ const lines = cell => migrateCell(cell).cell.split('\n')
 test('legacy grammar rules', () => {
   assert.deepEqual(parseLegacyLine('3x8@60'), { entry: { sets: 3, value: 8, type: '', weight: 60, weightUnit: 'kg' } })
   assert.deepEqual(parseLegacyLine(' 2x30s '), { entry: { sets: 2, value: 30, type: 's' } })
-  assert.deepEqual(parseLegacyLine('3x8 @60'), { error: 'bad sets×value' })
+  assert.deepEqual(parseLegacyLine('3x8 @60'), { error: 'bad setsxvalue' })
   assert.deepEqual(parseLegacyLine('3x8@'), { error: 'bad weight' })
-  assert.deepEqual(parseLegacyLine('3X8'), { error: 'bad sets×value' })
+  assert.deepEqual(parseLegacyLine('3X8'), { error: 'bad setsxvalue' })
 })
 
 test('unitless weight becomes kg', () => {
@@ -86,7 +86,7 @@ test('lines invalid in both grammars go to manual with both reasons', () => {
   const r = migrateCell('squats\n3x8 @60')
   assert.equal(r.cell, 'squats\n3x8 @60')
   assert.equal(r.manual.length, 2)
-  assert.match(r.manual[0].reason, /^legacy: bad sets×value; workline: /)
+  assert.match(r.manual[0].reason, /^legacy: bad setsxvalue; workline: /)
   assert.match(r.manual[1].reason, /RPE out of range/)
 })
 

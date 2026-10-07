@@ -8,9 +8,10 @@ syntax; `tsc --checkJs` is the type gate.
 ## Commands
 
 ```sh
-npm install      # .gitignore ignores package-lock.json, so npm ci fails
+npm ci
 npm run build    # tree-sitter generate + workline.wasm; first run downloads wasi-sdk
 npx tsc
+npx eslint .
 npm test         # node:test, vectors against workline.wasm
 go vet ./bindings/go/ ./golang/
 go test ./bindings/go/ ./golang/   # not ./...: node_modules can hold stray Go packages
@@ -52,5 +53,6 @@ swift build
 - cgo does not track `src/parser.c` (bindings/go `#include`s it from outside the
   package). `npm run build` writes `bindings/go/parser_sum.go` with its hash so
   Go (and CI's restored build cache) rebuilds the parser; commit it with `src/`.
-- Versions live in `package.json` and `tree-sitter.json`; bump both and tag.
+- Versions live in `package.json`, `tree-sitter.json`, `Makefile` and `CMakeLists.txt`
+  (`init -u` does not update the last two); bump all and tag.
   Consumers pin tags.

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-workline
-        VERSION "0.1.0"
+        VERSION "0.4.1"
         DESCRIPTION "Text notation for strength sets, one exercise per line"
         HOMEPAGE_URL "https://github.com/JakobMelchard/workline"
         LANGUAGES C)

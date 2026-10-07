@@ -5,6 +5,7 @@
 package workline
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -113,21 +114,24 @@ func Parse(cell string) Parsed {
 	return out
 }
 
-// ParseLine parses a single line. index is stored as Line.Index.
+// ParseLine parses a single line. index is stored as Line.Index. It returns
+// an error, never panics, when the parser cannot be set up or aborts.
 func ParseLine(raw string, index int) (Line, error) {
 	src := []byte(strings.ReplaceAll(raw, "\n", " "))
 	mu.Lock()
 	if parser == nil {
-		parser = sitter.NewParser()
-		if err := parser.SetLanguage(language); err != nil {
+		p := sitter.NewParser()
+		if err := p.SetLanguage(language); err != nil {
 			mu.Unlock()
-			panic("workline: " + err.Error())
+			p.Close()
+			return Line{}, fmt.Errorf("workline: %w", err)
 		}
+		parser = p
 	}
 	tree := parser.Parse(src, nil)
 	mu.Unlock()
 	if tree == nil {
-		panic("workline: parse aborted")
+		return Line{}, errors.New("workline: parse aborted")
 	}
 	defer tree.Close()
 	p := &lineParser{src: src}
