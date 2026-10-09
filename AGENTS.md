@@ -53,6 +53,14 @@ swift build
 - cgo does not track `src/parser.c` (bindings/go `#include`s it from outside the
   package). `npm run build` writes `bindings/go/parser_sum.go` with its hash so
   Go (and CI's restored build cache) rebuilds the parser; commit it with `src/`.
-- Versions live in `package.json`, `tree-sitter.json`, `Makefile` and `CMakeLists.txt`
-  (`init -u` does not update the last two); bump all and tag.
-  Consumers pin tags.
+- Releases: merge conventional commits to `main`; release-please (shared org workflow,
+  `.github/workflows/release.yml`) keeps a release PR open; merging it tags `vX.Y.Z` and
+  writes `CHANGELOG.md`. It bumps only `package.json` and `package-lock.json`. Never
+  hand-bump or tag. Consumers pin tags.
+- The grammar version in `tree-sitter.json` (also `Makefile` and `CMakeLists.txt`, which
+  `init -u` does not update) is separate from the package version: it feeds
+  `src/parser.c` `.patch_version`, `workline.wasm` and `parser_sum.go`. Bump it, in the
+  same PR as the grammar change, only when `grammar.js` changes, then `npm run build`
+  (needs the wasm toolchain, wasi-sdk is downloaded on first run) and commit `src/`,
+  `workline.wasm` and `parser_sum.go`. Release PRs then need no regeneration and CI's
+  `git diff --exit-code` stays green.
