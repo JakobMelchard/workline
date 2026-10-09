@@ -1,6 +1,6 @@
 LANGUAGE_NAME := tree-sitter-workline
 HOMEPAGE_URL := https://github.com/JakobMelchard/workline
-VERSION := 0.4.2
+VERSION := 0.4.3
 DESCRIPTION := Text notation for strength sets, one exercise per line
 
 # repository
