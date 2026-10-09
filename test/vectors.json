@@ -280,5 +280,34 @@
     "comment": "nested intervals are not workline",
     "in": "30-45' (4-6 x 15'' 90%)",
     "errors": [0]
+  },
+  {
+    "comment": "trailing whitespace is free",
+    "in": "3x8 \t\n1x5 ",
+    "canonical": "3x8\n1x5",
+    "lines": [{ "sets": [
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } }
+    ] }, { "sets": [
+      { "target": { "min": 5, "unit": "reps" } }
+    ] }]
+  },
+  {
+    "comment": "trailing whitespace after mods and defaults",
+    "in": "Bench Press / 1x5 @8 90s  \n3x8 / 60kg ",
+    "canonical": "Bench Press / 1x5 @8 90s\n3x8 / 60kg",
+    "lines": [{ "name": "Bench Press", "sets": [
+      { "target": { "min": 5, "unit": "reps" }, "rpe": { "value": 8 }, "rest": 90 }
+    ] }, { "sets": [
+      { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } },
+      { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } },
+      { "target": { "min": 8, "unit": "reps" }, "weight": { "value": 60, "unit": "kg" } }
+    ] }]
+  },
+  {
+    "comment": "an empty defaults section is still an error",
+    "in": "3x8 / ",
+    "errors": [0]
   }
 ]

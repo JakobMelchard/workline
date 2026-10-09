@@ -117,7 +117,9 @@ func Parse(cell string) Parsed {
 // ParseLine parses a single line. index is stored as Line.Index. It returns
 // an error, never panics, when the parser cannot be set up or aborts.
 func ParseLine(raw string, index int) (Line, error) {
-	src := []byte(strings.ReplaceAll(raw, "\n", " "))
+	// The generated lexer rejects a space or tab after the last token; trailing
+	// whitespace is free.
+	src := []byte(strings.TrimRight(strings.ReplaceAll(raw, "\n", " "), " \t\r"))
 	mu.Lock()
 	if parser == nil {
 		p := sitter.NewParser()
