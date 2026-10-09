@@ -4,4 +4,4 @@ package tree_sitter_workline
 
 // parserSum is the SHA-256 of src/parser.c, so Go rebuilds the cgo parser
 // whenever the grammar changes.
-const parserSum = "7f336614c2dc43ed91ae6e1552514f05f08c7b84620e14cceb0d1bfb968c5100"
+const parserSum = "3a2c3512e89b58e3dc464891d4db72863267f5238afee71ff31a15916aa13647"
