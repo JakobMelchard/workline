@@ -34,7 +34,7 @@
     "node": false,
     "python": false,
     "rust": false,
-    "swift": true,
+    "swift": false,
     "zig": false
   }
 }

@@ -13,9 +13,8 @@ every language and editor. Meaning: [`SPEC.md`](SPEC.md). Conformance cases:
 
 | Use | How |
 |---|---|
-| JS (Node, browser, Workers, Capacitor) | `@jakobmelchard/workline`, web-tree-sitter + `workline.wasm` |
+| JS (Node, browser, Workers, Capacitor) | reference implementation in `lib/`, not published to npm; web-tree-sitter + `workline.wasm` |
 | Go | `github.com/JakobMelchard/workline/golang` (package `workline`, cgo): `Parse`, `Expand`, `Serialize`; raw grammar in `bindings/go` |
-| Swift | this repo as a Swift package, `TreeSitterWorkline` |
 | Kotlin / Android | KTreeSitter with this grammar |
 | Neovim | nvim-treesitter parser config pointing at this repo, `queries/` for highlights |
 
