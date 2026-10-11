@@ -1,10 +1,5 @@
+.DS_Store
 node_modules/
+.wrangler/
+.dev.vars
 types/
-.build/
-build/
-Package.resolved
-*.o
-*.a
-*.so
-*.dylib
-*.pc

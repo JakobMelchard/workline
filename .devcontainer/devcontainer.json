@@ -1,0 +1,29 @@
+{
+  "name": "js",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/jakobmelchard/devcontainer/ws:1": {}
+  },
+  "postCreateCommand": "npm install && prek install",
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "JakobMelchard/.githooks": {
+          "permissions": {
+            "contents": "read"
+          }
+        },
+        "JakobMelchard/.agents": {
+          "permissions": {
+            "contents": "read"
+          }
+        },
+        "JakobMelchard/.config": {
+          "permissions": {
+            "contents": "read"
+          }
+        }
+      }
+    }
+  }
+}

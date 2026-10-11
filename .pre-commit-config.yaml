@@ -11,6 +11,7 @@ repos:
     rev: v1.0.1
     hooks:
       - id: conventional-commit
+      - id: eslint
   - repo: local
     hooks:
       # workline is a dependency: a broken export reaches every consumer before their CI runs
