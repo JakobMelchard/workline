@@ -13,9 +13,10 @@ jobs:
     uses: JakobMelchard/.github/.github/workflows/node.yml@e1ef2b10e7ee0c5426f78d63a4e9c6a0ce9b3fe9 # v1.6.0
     with:
       check-cmd: npx tsc
-      # Regenerate from grammar.js: committed parser sources and wasm must match, and
-      # the vectors run against both the committed and the rebuilt wasm.
-      test-cmd: npm test && npm run build && git diff --exit-code -- src/ bindings/go/parser_sum.go workline.wasm && npm test
+      # The vectors run against the committed wasm first, since that is what ships. Then
+      # regenerate from grammar.js: committed parser sources must match, and the vectors run
+      # against the freshly built wasm. The wasm itself is not byte-reproducible, so it is not diffed.
+      test-cmd: npm test && npm run build && git diff --exit-code -- src/ bindings/go/parser_sum.go && npm test
 
   go:
     uses: JakobMelchard/.github/.github/workflows/go.yml@e1ef2b10e7ee0c5426f78d63a4e9c6a0ce9b3fe9 # v1.6.0
