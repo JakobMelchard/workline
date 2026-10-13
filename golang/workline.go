@@ -213,7 +213,9 @@ func (p *lineParser) group(g *sitter.Node) (Group, error) {
 		return Group{}, err
 	}
 	amrap := t.ChildByFieldName("ask") != nil
-	steps := t.ChildrenByFieldName("step", t.Walk())
+	cur := t.Walk()
+	defer cur.Close()
+	steps := t.ChildrenByFieldName("step", cur)
 	// A step without a unit takes the unit the other steps name; they must agree.
 	unit := ""
 	for _, st := range steps {
