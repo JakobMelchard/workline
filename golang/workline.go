@@ -195,13 +195,18 @@ func (p *lineParser) syntaxError(n *sitter.Node) string {
 	return "syntax error"
 }
 
+const (
+	maxSets = 1000
+	maxRest = 86400 // seconds
+)
+
 func (p *lineParser) group(g *sitter.Node) (Group, error) {
 	sets := 1.0
 	if n := g.ChildByFieldName("sets"); n != nil {
 		sets = p.num(n)
 	}
-	if sets != math.Trunc(sets) || sets < 1 || sets > math.MaxInt32 {
-		return Group{}, errf("sets must be a whole number >= 1: %s", jsNum(sets))
+	if sets != math.Trunc(sets) || sets < 1 || sets > maxSets {
+		return Group{}, errf("sets must be a whole number from 1 to %d: %s", maxSets, jsNum(sets))
 	}
 	t, err := field(g, "target")
 	if err != nil {
@@ -333,21 +338,25 @@ func (p *lineParser) mods(node *sitter.Node) (Mods, error) {
 			}
 			mods.RPE = &Scalar{Value: value, Ask: ask}
 		case "rest":
-			if value != math.Trunc(value) || value > math.MaxInt32 {
+			if value != math.Trunc(value) {
 				return Mods{}, errf("rest must be whole: %s", text)
 			}
 			u, err := field(m, "unit")
 			if err != nil {
 				return Mods{}, err
 			}
-			secs := int(value)
+			secs := value
 			if targetUnits[strings.ToLower(p.text(u))] != "s" {
 				secs *= 60 // "m", "min" or "'"
+			}
+			if secs > maxRest {
+				return Mods{}, errf("rest must be at most %ds: %s", maxRest, text)
 			}
 			if err := claim("rest"); err != nil {
 				return Mods{}, err
 			}
-			mods.Rest = &secs
+			rest := int(secs)
+			mods.Rest = &rest
 		}
 	}
 	return mods, nil
