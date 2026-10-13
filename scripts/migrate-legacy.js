@@ -139,8 +139,6 @@ export function migrateCell(oldCell) {
   return { cell: out.join('\n'), changes, manual }
 }
 
-// ---------------------------------------------------------------- input files
-
 /**
  * Minimal RFC 4180 CSV parser.
  * @param {string} text @returns {string[][]}
@@ -199,8 +197,6 @@ export function readCells(text) {
   return body.map((r, i) => ({ id: `row ${i + (col < 0 ? 1 : 2)}`, cell: r[c] ?? '' }))
 }
 
-// ---------------------------------------------------------------- report
-
 /**
  * @typedef {{id:string, cell:string, tab?:string, row?:number, range?:string}} Source
  * @typedef {Source & Migrated & {from:string}} Result
@@ -224,8 +220,6 @@ export function report(results) {
   )
   return out.join('\n')
 }
-
-// ---------------------------------------------------------------- Google Sheets
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets'
 const SCOPE_RO = 'https://www.googleapis.com/auth/spreadsheets.readonly'
@@ -334,8 +328,6 @@ export async function readSheet(client, only = []) {
   }
   return { sources, scanned, skipped }
 }
-
-// ---------------------------------------------------------------- CLI
 
 /** @param {Source[]} sources @returns {Result[]} */
 const migrateAll = sources => sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))

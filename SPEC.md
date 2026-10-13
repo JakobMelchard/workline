@@ -49,7 +49,7 @@ before a suffix.
 
 ## Semantics
 
-- **sets**: a whole number >= 1; 1 when left out. There are no set ranges:
+- **sets**: a whole number from 1 to 1000; 1 when left out. There are no set ranges:
   `3-4 x 8` is an error.
 - **target**: the reps (or seconds, minutes, kilometers) per set.
   `8-12` is a range, `min <= max`. A trailing `+` marks it as logged:
@@ -64,7 +64,7 @@ before a suffix.
   logging. `?+` means no prescribed weight, ask for it.
 - **percent**: percentage of 1RM, `0 < value <= 200`. `+` as for weight.
 - **rpe**: target RPE, `1 <= value <= 10`. `+` means the lifter logs actual RPE.
-- **rest**: rest after each set, a whole number, stored in seconds.
+- **rest**: rest after each set, a whole number, stored in seconds, at most 86400.
 - A group holds at most one of each mod kind, and not both weight and percent.
 - The trailing `/ mods` section is the line's defaults. A group's own mod wins
   over the default of the same kind; weight and percent count as one kind.
