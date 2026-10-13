@@ -284,6 +284,15 @@ export function sheetIdOf(s) {
   return /\/d\/([A-Za-z0-9_-]+)/.exec(t)?.[1] ?? t
 }
 
+/**
+ * The only sheet this tool may ever write is the test sheet.
+ * @param {string} sheet @param {string} [testSheet] id or URL, normally $GSHEET_TEST_SHEET
+ */
+export function assertWritable(sheet, testSheet) {
+  const test = sheetIdOf(testSheet ?? '')
+  if (!test || sheetIdOf(sheet) !== test) throw new Error('refusing --write: sheet is not $GSHEET_TEST_SHEET')
+}
+
 /** @param {string} tab */
 const quote = tab => `'${tab.replace(/'/g, "''")}'`
 
@@ -355,10 +364,8 @@ async function main(argv) {
     return
   }
 
-  // Hard guard: the only sheet this tool may ever write is the test sheet.
   o.sheet = sheetIdOf(o.sheet)
-  const test = sheetIdOf(process.env.GSHEET_TEST_SHEET ?? '')
-  if (o.write && (!test || o.sheet !== test)) throw new Error('refusing --write: sheet is not $GSHEET_TEST_SHEET')
+  if (o.write) assertWritable(o.sheet, process.env.GSHEET_TEST_SHEET)
   const sa = process.env.GSHEET_SERVICE_PRINCIPAL_JSON
   if (!sa) throw new Error('GSHEET_SERVICE_PRINCIPAL_JSON is not set')
 

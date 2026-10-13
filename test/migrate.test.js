@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { init, parse, expand } from '../lib/index.js'
-import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf } from '../scripts/migrate-legacy.js'
+import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf, assertWritable, sheetsClient } from '../scripts/migrate-legacy.js'
 
 await init()
 
@@ -122,4 +122,24 @@ test('colName', () => {
 test('sheetIdOf accepts ids and URLs', () => {
   assert.equal(sheetIdOf('abc_D-1'), 'abc_D-1')
   assert.equal(sheetIdOf(' https://docs.google.com/spreadsheets/d/abc_D-1/edit#gid=0 '), 'abc_D-1')
+})
+
+test('--write is only allowed for the test sheet', () => {
+  const url = 'https://docs.google.com/spreadsheets/d/abc123/edit#gid=0'
+  assert.throws(() => assertWritable('abc123', undefined), /refusing/)
+  assert.throws(() => assertWritable('abc123', ''), /refusing/)
+  assert.throws(() => assertWritable('', ''), /refusing/)
+  assert.throws(() => assertWritable('abc123', 'other'), /refusing/)
+  assert.doesNotThrow(() => assertWritable('abc123', 'abc123'))
+  assert.doesNotThrow(() => assertWritable(url, 'abc123'))
+  assert.doesNotThrow(() => assertWritable('abc123', url))
+})
+
+test('a read-only sheets client refuses writes without calling fetch', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', async () => Response.json({}))
+  const ro = sheetsClient('abc123', 'tok')
+  await assert.rejects(ro.call('/values:batchUpdate', { method: 'POST' }), /read-only/)
+  assert.equal(fetch.mock.callCount(), 0)
+  await ro.call('?fields=x')
+  assert.equal(fetch.mock.callCount(), 1)
 })
