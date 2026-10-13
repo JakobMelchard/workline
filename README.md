@@ -1,22 +1,33 @@
 # workline
 
-Text notation for strength sets, one exercise per line, made to live in a
-spreadsheet cell. Syntax inspired by Liftoscript exercise lines.
+Text notation for strength sets, one exercise per line, made to live in a spreadsheet cell. One tree-sitter grammar defines the syntax for every language and editor.
 
 ```
 Bench Press / 4x5, 1x5+ @8 / 100kg 2m
 ```
 
-One tree-sitter grammar ([`grammar.js`](grammar.js)) defines the syntax for
-every language and editor. Meaning: [`SPEC.md`](SPEC.md). Conformance cases:
-[`test/vectors.json`](test/vectors.json).
+```sh
+npm ci
+npm run build    # tree-sitter generate + workline.wasm; first run downloads wasi-sdk
+npx tsc
+npx eslint .
+npm test
+go vet ./bindings/go/ ./golang/
+go test ./bindings/go/ ./golang/    # not ./...: node_modules can hold stray Go packages
+```
 
-| Use | How |
+| Path | Contents |
 |---|---|
-| JS (Node, browser, Workers, Capacitor) | reference implementation in `lib/`, not published to npm; web-tree-sitter + `workline.wasm` |
-| Go | `github.com/JakobMelchard/workline/golang` (package `workline`, cgo): `Parse`, `Expand`, `Serialize`; raw grammar in `bindings/go` |
-| Kotlin / Android | KTreeSitter with this grammar |
-| Neovim | nvim-treesitter parser config pointing at this repo, `queries/` for highlights |
+| `grammar.js` | the grammar; `src/` is generated from it |
+| `SPEC.md` | meaning: value ranges, defaults, canonical form |
+| `test/vectors.json` | conformance cases every implementation must pass |
+| `lib/index.js` | JS reference implementation (web-tree-sitter + `workline.wasm`), not published to npm |
+| `golang/` | Go package `github.com/JakobMelchard/workline/golang`: `Parse`, `Expand`, `Serialize` |
+| `bindings/go` | raw cgo grammar binding |
+| `queries/highlights.scm` | editor highlighting (Neovim via nvim-treesitter) |
+| `scripts/migrate-legacy.js` | converts old `JakobMelchard/workout` load cells |
+
+## Use
 
 ```js
 import { init, parse, expand, serialize } from '@jakobmelchard/workline'
@@ -28,10 +39,7 @@ const sets = expand(lines[0])   // one entry per set, defaults applied
 const canonical = serialize({ lines, errors })
 ```
 
-Browsers and Android WebView need no options: `init()` fetches the wasm next
-to the module and instantiates it asynchronously. On Cloudflare Workers, wasm
-can't be fetched or compiled at runtime, so import both files as modules
-(wrangler's default rule) and hand them over:
+On Cloudflare Workers, import both wasm files as modules and pass them in:
 
 ```js
 import runtime from '@jakobmelchard/workline/web-tree-sitter.wasm'
@@ -48,27 +56,12 @@ sets := workline.Expand(p.Lines[0])
 canonical := workline.Serialize(p)
 ```
 
-```sh
-npm install && npm run build && npx tsc && npm test
-go test ./bindings/go/ ./golang/
-```
-
 ## Legacy migration
-
-`scripts/migrate-legacy.js` converts load cells written in the old
-`JakobMelchard/workout` grammar (`3x8@60`, `@` = weight, default kg) to
-workline (`3x8 60kg`). Lines it cannot convert safely are kept verbatim and
-listed for manual fixing, including every legacy `m` target (meters or
-minutes; workline `m` is minutes). See SPEC.md "Legacy input".
 
 ```sh
 node scripts/migrate-legacy.js cells.json          # or cells.csv, or stdin; report only
-node scripts/migrate-legacy.js --sheet <id|url>    # read-only: every tab's `load` column,
-                                                   # report + proposed values:batchUpdate JSON
-node scripts/migrate-legacy.js --sheet <id> --tab <name> --write   # test sheet only
+node scripts/migrate-legacy.js --sheet <id|url>    # read-only; report + proposed values:batchUpdate JSON
+node scripts/migrate-legacy.js --sheet <id> --tab <name> --write   # only $GSHEET_TEST_SHEET
 ```
 
-`--sheet` authenticates with the service-account JSON in
-`GSHEET_SERVICE_PRINCIPAL_JSON` and a read-only scope. `--write` is refused
-unless the sheet is `$GSHEET_TEST_SHEET`; migrate real sheets by reviewing the
-proposed batch and applying it yourself. `--json` prints machine-readable output.
+Needs `GSHEET_SERVICE_PRINCIPAL_JSON`. `--json` prints machine-readable output. See "Legacy input" in `SPEC.md`.
