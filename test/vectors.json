@@ -87,6 +87,10 @@
     "lines": [{ "sets": [{ "target": { "min": 5, "unit": "reps" } }] }]
   },
   { "in": "0x5", "errors": [0] },
+  { "in": "1001x5", "errors": [0] },
+  { "in": "5000000000x5", "errors": [0] },
+  { "in": "3x8 1441m", "errors": [0] },
+  { "in": "3x8 86401s", "errors": [0] },
   { "in": "3x12-8", "errors": [0] },
   { "in": "3x8reps", "errors": [0] },
   { "in": "3x8 @8 @9", "errors": [0] },
