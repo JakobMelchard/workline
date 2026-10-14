@@ -28,3 +28,10 @@ for (const v of vectors) {
     assert.equal(serialize(again), out, 'canonical form is not a fixed point')
   })
 }
+
+test('expand truncates fractional weeks and treats NaN as week 1', () => {
+  const line = parse('3x8|6|4').lines[0]
+  const mins = (/** @type {number} */ w) => expand(line, w).map(s => s.target.min)
+  assert.deepEqual(mins(2.7), [6, 6, 6])
+  assert.deepEqual(mins(NaN), [8, 8, 8])
+})
