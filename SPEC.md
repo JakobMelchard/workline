@@ -103,13 +103,14 @@ v1 reads `@` as RPE. For migration:
 - `@<num>kg` / `@<num>lb` is accepted as weight and serializes in canonical
   form (`3x8@60kg` becomes `3x8 60kg`).
 - `@<num>` without a unit is RPE. Values above 10 error, which flags old
-  unitless weights for manual fixing.
+  unitless weights for manual fixing. Unitless values up to 10
+  are valid both ways, so the migration lists them instead of converting.
 - Legacy target suffixes other than `r`, `s`, `m`, `min`, `km` error. Note
   that a legacy `m` meant meters and now means minutes.
 
 `scripts/migrate-legacy.js` applies these rules to whole cells: it parses each
 line with the legacy grammar, rewrites `@<num>[kg|lb]` as a weight (unitless
-means kg), maps legacy `r` to reps and keeps `s`, `min`, `km`, checks the
+above 10 means kg), maps legacy `r` to reps and keeps `s`, `min`, `km`, checks the
 result with `parse`, and lists every line it cannot convert for manual fixing.
 Legacy `m` is always listed, never converted. Usage is in the README.
 

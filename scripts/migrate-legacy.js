@@ -99,6 +99,7 @@ function mismatch(l, e) {
  * Line count and blank lines are preserved so `time` cells stay index-aligned.
  * Lines that cannot be converted are kept verbatim and listed in `manual`.
  * Lines the legacy grammar rejects but workline already reads are kept as is.
+ * Unitless `@n` is a weight in legacy and RPE in workline, so it is listed, not converted.
  * @param {string} oldCell @returns {Migrated}
  */
 export function migrateCell(oldCell) {
@@ -113,6 +114,10 @@ export function migrateCell(oldCell) {
       // Not legacy; fine if it is already valid workline (e.g. migrated before).
       if (!parse(raw).errors.length) return raw
       manual.push({ line, raw, reason: `legacy: ${legacy.error}; workline: ${parse(raw).errors[0].reason}` })
+      return raw
+    }
+    if (parse(raw).lines[0]?.groups[0]?.rpe) {
+      manual.push({ line, raw, reason: 'ambiguous: legacy weight or workline RPE' })
       return raw
     }
     const conv = convertEntry(legacy.entry)

@@ -27,8 +27,11 @@ test('explicit units keep their unit, lowercased, aliases folded', () => {
   assert.deepEqual(lines('3x8@60lb\n1x5@100KG\n3x8@7.5lbs\n2x5@20kgs'), ['3x8 60lb', '1x5 100kg', '3x8 7.5lb', '2x5 20kg'])
 })
 
-test('small unitless weights are still weights, not RPE', () => {
-  assert.equal(migrateCell('3x8@8').cell, '3x8 8kg')
+test('unitless @ at most 10 is ambiguous with RPE and left for review', () => {
+  const r = migrateCell('5x5@8\n3x8@60')
+  assert.equal(r.cell, '5x5@8\n3x8 60kg')
+  assert.deepEqual(r.manual.map(m => m.line), [0])
+  assert.match(r.manual[0].reason, /RPE/)
 })
 
 test('numbers are canonicalized', () => {
@@ -36,8 +39,8 @@ test('numbers are canonicalized', () => {
 })
 
 test('s, min, km carry over; min keeps its spelling', () => {
-  const r = migrateCell('2x30s\n1x2min\n1x2MIN@5\n1x1.5km@10')
-  assert.equal(r.cell, '2x30s\n1x2min\n1x2min 5kg\n1x1.5km 10kg')
+  const r = migrateCell('2x30s\n1x2min\n1x2MIN@25\n1x1.5km@15')
+  assert.equal(r.cell, '2x30s\n1x2min\n1x2min 25kg\n1x1.5km 15kg')
   assert.equal(r.changes.length, 2)
   assert.deepEqual(r.manual, [])
   assert.equal(expand(parse('1x2min').lines[0])[0].target.unit, 'min')
@@ -91,7 +94,7 @@ test('lines invalid in both grammars go to manual with both reasons', () => {
 })
 
 test('lines already in workline form are kept, so migration is idempotent', () => {
-  const once = migrateCell('3x8@60\n2x30s\n3x60s@12\n1x2min@5\n3x10r')
+  const once = migrateCell('3x8@60\n2x30s\n3x60s@12\n1x2min@25\n3x10r')
   const twice = migrateCell(once.cell)
   assert.equal(twice.cell, once.cell)
   assert.deepEqual(twice.changes, [])
