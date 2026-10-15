@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-/// <reference types="tree-sitter-cli/dsl" />
+/// <reference path="node_modules/tree-sitter-cli/dsl.d.ts" />
 // @ts-check
 
 const NUM = /\d+(\.\d+)?/
@@ -96,27 +96,52 @@ export default grammar({
 
 /** @typedef {GrammarSymbols<string>} S */
 
-/** @param {S} $ @param {RegExp} re */
+/**
+ * A unit suffix, glued to the number before it.
+ * @param {S} $ grammar symbols
+ * @param {RegExp} re accepted unit spellings
+ * @returns {AliasRule} unit node
+ */
 function unit($, re) {
   return alias(token.immediate(re), $.unit)
 }
 
-/** @param {S} $ @param {RuleOrLiteral} num */
+/**
+ * A weight, "60kg" or "60kg+".
+ * @param {S} $ grammar symbols
+ * @param {RuleOrLiteral} num the number rule, with or without its leading gap
+ * @returns {SeqRule} weight rule
+ */
 function weight($, num) {
   return seq(field('value', num), field('unit', unit($, /kg|lb/i)), optional(field('ask', $._ask)))
 }
 
-/** @param {S} $ @param {RuleOrLiteral} num */
+/**
+ * A load in percent, "75%" or "75%+".
+ * @param {S} $ grammar symbols
+ * @param {RuleOrLiteral} num the number rule, with or without its leading gap
+ * @returns {SeqRule} percent rule
+ */
 function percent($, num) {
   return seq(field('value', num), token.immediate('%'), optional(field('ask', $._ask)))
 }
 
-/** @param {S} $ @param {RuleOrLiteral} num */
+/**
+ * A rest time, "90s" or "2m".
+ * @param {S} $ grammar symbols
+ * @param {RuleOrLiteral} num the number rule, with or without its leading gap
+ * @returns {SeqRule} rest rule
+ */
 function rest($, num) {
   return seq(field('value', num), field('unit', unit($, /s|m|min|'|''/i)))
 }
 
-/** @param {RuleOrLiteral} rule @param {string} sep */
+/**
+ * One or more rules, separated by sep.
+ * @param {RuleOrLiteral} rule repeated rule
+ * @param {string} sep separator literal
+ * @returns {SeqRule} separated list
+ */
 function sep1(rule, sep) {
   return seq(rule, repeat(seq(sep, rule)))
 }

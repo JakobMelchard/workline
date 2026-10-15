@@ -5,7 +5,6 @@
  *
  * Legacy line: SETSxVALUE[TYPE][@WEIGHT[UNIT]], `@` = weight, default unit kg.
  * Legacy TYPE `m` (meters or minutes) is never auto-converted: workline `m` is minutes.
- *
  * @typedef {{sets:number, value:number, type:string, weight?:number, weightUnit?:string}} LegacyEntry
  * @typedef {{line:number, from:string, to:string}} Change
  * @typedef {{line:number, raw:string, reason:string}} Manual
@@ -44,7 +43,8 @@ const UNITS = /** @type {Record<string,string>} */ ({ '': DEFAULT_UNIT, kg: 'kg'
 
 /**
  * Parse one line with the legacy rules.
- * @param {string} raw @returns {{entry:LegacyEntry} | {error:string}}
+ * @param {string} raw legacy line
+ * @returns {{entry:LegacyEntry} | {error:string}} the entry, or why the legacy grammar rejects it
  */
 export function parseLegacyLine(raw) {
   const s = raw.trim()
@@ -64,7 +64,8 @@ export function parseLegacyLine(raw) {
 
 /**
  * Legacy entry -> workline line text, or the reason it cannot be converted.
- * @param {LegacyEntry} e @returns {{text:string} | {error:string}}
+ * @param {LegacyEntry} e legacy entry
+ * @returns {{text:string} | {error:string}} workline text, or why it cannot be converted
  */
 export function convertEntry(e) {
   const t = e.type.toLowerCase()
@@ -82,7 +83,9 @@ export function convertEntry(e) {
 
 /**
  * Check a workline line means exactly the legacy entry.
- * @param {import('../lib/index.js').Line} l @param {LegacyEntry} e @returns {string | undefined} mismatch
+ * @param {import('../lib/index.js').Line} l workline line
+ * @param {LegacyEntry} e legacy entry
+ * @returns {string | undefined} mismatch, undefined when equal
  */
 function mismatch(l, e) {
   const g = l.groups[0]
@@ -92,6 +95,7 @@ function mismatch(l, e) {
   if (g.percent || g.rpe || g.rest !== undefined) return 'unexpected mods'
   const w = e.weight === undefined ? undefined : { value: e.weight, unit: UNITS[(e.weightUnit ?? '').toLowerCase()] }
   if (w?.value !== g.weight?.value || w?.unit !== g.weight?.unit || g.weight?.ask) return 'weight changed'
+  return undefined
 }
 
 /**
@@ -100,7 +104,8 @@ function mismatch(l, e) {
  * Lines that cannot be converted are kept verbatim and listed in `manual`.
  * Lines the legacy grammar rejects but workline already reads are kept as is.
  * Unitless `@n` is a weight in legacy and RPE in workline, so it is listed, not converted.
- * @param {string} oldCell @returns {Migrated}
+ * @param {string} oldCell legacy cell
+ * @returns {Migrated} migrated cell, its changes and the lines left for a manual fix
  */
 export function migrateCell(oldCell) {
   /** @type {Change[]} */
@@ -146,7 +151,8 @@ export function migrateCell(oldCell) {
 
 /**
  * Minimal RFC 4180 CSV parser.
- * @param {string} text @returns {string[][]}
+ * @param {string} text CSV text
+ * @returns {string[][]} rows of fields
  */
 export function parseCsv(text) {
   /** @type {string[][]} */
@@ -185,7 +191,8 @@ export function parseCsv(text) {
 /**
  * Cells from JSON (array of strings, array of {id?, cell|load}, or {id: cell})
  * or CSV (column `load` if the header has one, else the first column).
- * @param {string} text @returns {{id:string, cell:string}[]}
+ * @param {string} text JSON or CSV text
+ * @returns {{id:string, cell:string}[]} cells with an id for the report
  */
 export function readCells(text) {
   const t = text.trim()
@@ -207,7 +214,10 @@ export function readCells(text) {
  * @typedef {Source & Migrated & {from:string}} Result
  */
 
-/** @param {Result[]} results @returns {string} diff-style report */
+/**
+ * @param {Result[]} results migrated cells
+ * @returns {string} diff-style report
+ */
 export function report(results) {
   const out = []
   for (const r of results) {
@@ -230,12 +240,17 @@ const API = 'https://sheets.googleapis.com/v4/spreadsheets'
 const SCOPE_RO = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 const SCOPE_RW = 'https://www.googleapis.com/auth/spreadsheets'
 
-/** @param {ArrayBuffer | Uint8Array} buf */
+/**
+ * @param {ArrayBuffer | Uint8Array} buf bytes
+ * @returns {string} base64url text
+ */
 const b64url = buf => Buffer.from(buf instanceof Uint8Array ? buf : new Uint8Array(buf)).toString('base64url')
 
 /**
  * Service-account JWT -> access token (RS256 via WebCrypto).
- * @param {string} saJson @param {string} scope @returns {Promise<string>}
+ * @param {string} saJson service account key JSON
+ * @param {string} scope OAuth scope
+ * @returns {Promise<string>} access token
  */
 export async function accessToken(saJson, scope) {
   const sa = JSON.parse(saJson)
@@ -252,15 +267,22 @@ export async function accessToken(saJson, scope) {
     signal: AbortSignal.timeout(30e3),
   })
   if (!res.ok) throw new Error(`token: HTTP ${res.status} ${await res.text()}`)
-  return (await res.json()).access_token
+  return /** @type {{access_token: string}} */ (await res.json()).access_token
 }
 
 /**
  * Tiny Sheets v4 client. `write` must be true for any non-GET call.
- * @param {string} sheetId @param {string} token @param {boolean} [write]
+ * @param {string} sheetId spreadsheet id
+ * @param {string} token access token
+ * @param {boolean} [write] allow non-GET calls
+ * @returns {{call: typeof call, tabs: () => Promise<string[]>, values: (tab: string) => Promise<string[][]>}} client
  */
 export function sheetsClient(sheetId, token, write = false) {
-  /** @param {string} path @param {RequestInit} [init] */
+  /**
+   * @param {string} path path and query under the spreadsheet
+   * @param {RequestInit} [init] fetch options
+   * @returns {Promise<unknown>} parsed JSON response
+   */
   const call = async (path, init = {}) => {
     if ((init.method ?? 'GET') !== 'GET' && !write) throw new Error('refusing to write: client is read-only')
     const res = await fetch(`${API}/${encodeURIComponent(sheetId)}${path}`, {
@@ -273,16 +295,16 @@ export function sheetsClient(sheetId, token, write = false) {
   }
   return {
     call,
-    /** @returns {Promise<string[]>} */
-    tabs: async () => (await call('?fields=sheets.properties.title')).sheets.map((/** @type {any} */ s) => s.properties.title),
-    /** @param {string} tab @returns {Promise<string[][]>} */
-    values: async tab => (await call(`/values/${encodeURIComponent(quote(tab))}`)).values ?? [],
+    tabs: async () =>
+      /** @type {{sheets: {properties: {title: string}}[]}} */ (await call('?fields=sheets.properties.title')).sheets.map(s => s.properties.title),
+    values: async tab => /** @type {{values?: string[][]}} */ (await call(`/values/${encodeURIComponent(quote(tab))}`)).values ?? [],
   }
 }
 
 /**
  * Spreadsheet id from a bare id or a docs.google.com URL.
- * @param {string} s @returns {string}
+ * @param {string} s id or URL
+ * @returns {string} spreadsheet id
  */
 export function sheetIdOf(s) {
   const t = (s ?? '').trim()
@@ -291,17 +313,24 @@ export function sheetIdOf(s) {
 
 /**
  * The only sheet this tool may ever write is the test sheet.
- * @param {string} sheet @param {string} [testSheet] id or URL, normally $GSHEET_TEST_SHEET
+ * @param {string} sheet id or URL to write
+ * @param {string} [testSheet] id or URL, normally $GSHEET_TEST_SHEET
  */
 export function assertWritable(sheet, testSheet) {
   const test = sheetIdOf(testSheet ?? '')
   if (!test || sheetIdOf(sheet) !== test) throw new Error('refusing --write: sheet is not $GSHEET_TEST_SHEET')
 }
 
-/** @param {string} tab */
+/**
+ * @param {string} tab tab name
+ * @returns {string} tab name quoted for A1 notation
+ */
 const quote = tab => `'${tab.replace(/'/g, "''")}'`
 
-/** @param {number} i 0-based column @returns {string} A1 letters */
+/**
+ * @param {number} i 0-based column
+ * @returns {string} A1 letters
+ */
 export function colName(i) {
   let s = ''
   for (i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s
@@ -310,8 +339,9 @@ export function colName(i) {
 
 /**
  * Every tab's `load` column (header row 1) as sources. Tabs without one are skipped.
- * @param {ReturnType<typeof sheetsClient>} client @param {string[]} [only] tab filter
- * @returns {Promise<{sources:Source[], scanned:string[], skipped:string[]}>}
+ * @param {Pick<ReturnType<typeof sheetsClient>, 'tabs' | 'values'>} client sheets client
+ * @param {string[]} [only] tab filter
+ * @returns {Promise<{sources:Source[], scanned:string[], skipped:string[]}>} load cells and the tabs read or skipped
  */
 export async function readSheet(client, only = []) {
   /** @type {Source[]} */
@@ -334,10 +364,16 @@ export async function readSheet(client, only = []) {
   return { sources, scanned, skipped }
 }
 
-/** @param {Source[]} sources @returns {Result[]} */
+/**
+ * @param {Source[]} sources cells to migrate
+ * @returns {Result[]} migrated cells
+ */
 const migrateAll = sources => sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))
 
-/** @param {Result[]} results */
+/**
+ * @param {Result[]} results migrated cells
+ * @returns {{valueInputOption: 'RAW', data: {range?: string, values: string[][]}[]}} values:batchUpdate body
+ */
 export const updatesOf = results => ({
   valueInputOption: 'RAW',
   data: results.filter(r => r.changes.length).map(r => ({ range: r.range, values: [[r.cell]] })),
@@ -349,7 +385,10 @@ const USAGE = `usage: migrate-legacy.js [file.json|file.csv|-] [--sheet ID [--ta
   --write  apply the batch; only allowed when ID equals $GSHEET_TEST_SHEET
   --json   print one JSON object {results, updates} instead of the text report`
 
-/** @param {string[]} argv */
+/**
+ * @param {string[]} argv command-line arguments
+ * @returns {Promise<void>} resolves when done; exitCode is 1 when verify fails
+ */
 async function main(argv) {
   const { values: v, positionals: [file, ...extra] } = parseArgs({
     args: argv,
@@ -402,7 +441,7 @@ async function main(argv) {
 
   const rw = sheetsClient(o.sheet, await accessToken(sa, SCOPE_RW), true)
   const res = await rw.call('/values:batchUpdate', { method: 'POST', body: JSON.stringify(updates) })
-  console.error(`wrote ${res.totalUpdatedCells} cells`)
+  console.error(`wrote ${/** @type {{totalUpdatedCells: number}} */ (res).totalUpdatedCells} cells`)
   const again = migrateAll((await readSheet(ro, o.tabs)).sources)
   const left = again.filter(r => r.changes.length).length
   console.error(left ? `verify FAILED: ${left} cells still convert` : 'verify ok: re-read converts nothing further')
