@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tree-sitter generate && tree-sitter build --wasm -o workline.wasm && cp node_modules/web-tree-sitter/web-tree-sitter.wasm . && node scripts/parser-sum.js",
     "prepare": "tsc -p tsconfig.build.json",
-    "check": "tsc",
+    "check": "tsc && prettier --check .",
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
@@ -37,6 +37,7 @@
     "eslint": "10.12.0",
     "eslint-plugin-jsdoc": "64.5.4",
     "globals": "17.13.0",
+    "prettier": "3.9.9",
     "tree-sitter-cli": "0.27.0",
     "typescript": "5.9.3"
   },
@@ -46,5 +47,6 @@
   "allowScripts": {
     "tree-sitter-cli@0.27.0": true
   },
+  "prettier": "@jakobmelchard/config/prettier",
   "license": "MIT"
 }

@@ -12,7 +12,7 @@ jobs:
   js:
     uses: JakobMelchard/.github/.github/workflows/node.yml@4258fca96cbd14e90054debed585f9cf8aad04f7 # v2.1.0
     with:
-      check-cmd: npx tsc
+      check-cmd: npm run check
       lint-cmd: npx eslint --max-warnings 0 .
       # The vectors run against the committed wasm first, since that is what ships. Then
       # regenerate from grammar.js: committed parser sources must match, and the vectors run
@@ -25,5 +25,5 @@ jobs:
   hooks:
     uses: JakobMelchard/.github/.github/workflows/hooks.yml@4258fca96cbd14e90054debed585f9cf8aad04f7 # v2.1.0
     with:
-      # tsc, eslint and npm test run in the js job above
-      skip: tsc,eslint,test
+      # prettier, tsc, eslint and npm test run in the js job above
+      skip: prettier,tsc,eslint,test

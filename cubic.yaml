@@ -6,16 +6,16 @@ reviews:
   incremental_commits: false
   ignore:
     pr_titles:
-      - "*"
+      - '*'
     files:
-      - "**/*.lock"
-      - "**/package-lock.json"
-      - "**/pnpm-lock.yaml"
-      - "**/go.sum"
-      - "**/uv.lock"
-      - "**/Package.resolved"
-      - "**/dist/**"
-      - "**/build/**"
-      - "**/generated/**"
-      - "**/*.generated.*"
-      - "**/*.pb.go"
+      - '**/*.lock'
+      - '**/package-lock.json'
+      - '**/pnpm-lock.yaml'
+      - '**/go.sum'
+      - '**/uv.lock'
+      - '**/Package.resolved'
+      - '**/dist/**'
+      - '**/build/**'
+      - '**/generated/**'
+      - '**/*.generated.*'
+      - '**/*.pb.go'
