@@ -5,11 +5,16 @@ import { readFileSync } from 'node:fs'
 import { init, parse, serialize, expand } from '../lib/index.js'
 
 /** @typedef {{in:string, week?:number, canonical?:string, errors?:number[], lines?:{name?:string, sets:object[]}[], comment?:string}} Vector */
-/** @type {Vector[]} */
 await init()
+/** @type {Vector[]} */
 const vectors = JSON.parse(readFileSync(new URL('vectors.json', import.meta.url), 'utf8'))
 
-/** @param {import('../lib/index.js').Parsed} p @param {number} [week] */
+/**
+ * The vector's view of a parse: error line numbers and expanded sets per line.
+ * @param {import('../lib/index.js').Parsed} p parsed cell
+ * @param {number} [week] week of the block
+ * @returns {{errors: number[], lines: {name?: string, sets: import('../lib/index.js').SetSpec[]}[]}} comparable view
+ */
 const view = (p, week) => ({
   errors: p.errors.map(e => e.line),
   lines: p.lines.map(l => ({ ...(l.name ? { name: l.name } : {}), sets: expand(l, week) })),

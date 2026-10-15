@@ -5,7 +5,10 @@ import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf, 
 
 await init()
 
-/** @param {string} cell */
+/**
+ * @param {string} cell legacy cell
+ * @returns {string[]} migrated lines
+ */
 const lines = cell => migrateCell(cell).cell.split('\n')
 
 test('legacy grammar rules', () => {
@@ -149,7 +152,9 @@ test('a read-only sheets client refuses writes without calling fetch', async t =
 
 test('readSheet addresses the load column per tab, quoting tab names', async () => {
   const tabs = { 'Plan': [['day', 'load'], ['a', '3x8@60'], ['b']], "Bob's": [['x', 'y', 'Load '], ['', '', '2x30s']], 'Notes': [['text'], ['hi']] }
-  const client = /** @type {any} */ ({ tabs: async () => Object.keys(tabs), values: async (/** @type {string} */ t) => tabs[/** @type {keyof typeof tabs} */ (t)] })
+  /** @type {Record<string, string[][]>} */
+  const byTab = tabs
+  const client = { tabs: async () => Object.keys(tabs), values: async (/** @type {string} */ t) => byTab[t] }
   const r = await readSheet(client)
   assert.deepEqual(r.scanned, ['Plan', "Bob's"])
   assert.deepEqual(r.skipped, ['Notes'])
@@ -162,7 +167,7 @@ test('readSheet addresses the load column per tab, quoting tab names', async () 
 })
 
 test('updatesOf writes only changed cells', async () => {
-  const client = /** @type {any} */ ({ tabs: async () => ['Plan'], values: async () => [['load'], ['3x8@60'], ['2x30s']] })
+  const client = { tabs: async () => ['Plan'], values: async () => [['load'], ['3x8@60'], ['2x30s']] }
   await init()
   const { sources } = await readSheet(client)
   const results = sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))

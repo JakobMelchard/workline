@@ -4,6 +4,7 @@ import base from '@jakobmelchard/config/eslint'
 const dsl = ['grammar', 'seq', 'choice', 'repeat', 'repeat1', 'optional', 'field', 'alias', 'token']
 
 // lib/ runs in Node, browsers and Workers; scripts/ and test/ on Node.
+/** @type {import('eslint').Linter.Config[]} */
 export default [
   ...base,
   { languageOptions: { globals: { ...globals.node, ...globals.browser } } },

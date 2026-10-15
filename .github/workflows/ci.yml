@@ -13,6 +13,7 @@ jobs:
     uses: JakobMelchard/.github/.github/workflows/node.yml@4258fca96cbd14e90054debed585f9cf8aad04f7 # v2.1.0
     with:
       check-cmd: npx tsc
+      lint-cmd: npx eslint --max-warnings 0 .
       # The vectors run against the committed wasm first, since that is what ships. Then
       # regenerate from grammar.js: committed parser sources must match, and the vectors run
       # against the freshly built wasm. The wasm itself is not byte-reproducible, so it is not diffed.
