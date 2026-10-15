@@ -16,26 +16,26 @@ go vet ./bindings/go/ ./golang/
 go test ./bindings/go/ ./golang/    # not ./...: node_modules can hold stray Go packages
 ```
 
-| Path | Contents |
-|---|---|
-| `grammar.js` | the grammar; `src/` is generated from it |
-| `SPEC.md` | meaning: value ranges, defaults, canonical form |
-| `test/vectors.json` | conformance cases every implementation must pass |
-| `lib/index.js` | JS reference implementation (web-tree-sitter + `workline.wasm`), not published to npm |
-| `golang/` | Go package `github.com/JakobMelchard/workline/golang`: `Parse`, `Expand`, `Serialize` |
-| `bindings/go` | raw cgo grammar binding |
-| `queries/highlights.scm` | editor highlighting (Neovim via nvim-treesitter) |
-| `scripts/migrate-legacy.js` | converts old `JakobMelchard/workout` load cells |
+| Path                        | Contents                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `grammar.js`                | the grammar; `src/` is generated from it                                              |
+| `SPEC.md`                   | meaning: value ranges, defaults, canonical form                                       |
+| `test/vectors.json`         | conformance cases every implementation must pass                                      |
+| `lib/index.js`              | JS reference implementation (web-tree-sitter + `workline.wasm`), not published to npm |
+| `golang/`                   | Go package `github.com/JakobMelchard/workline/golang`: `Parse`, `Expand`, `Serialize` |
+| `bindings/go`               | raw cgo grammar binding                                                               |
+| `queries/highlights.scm`    | editor highlighting (Neovim via nvim-treesitter)                                      |
+| `scripts/migrate-legacy.js` | converts old `JakobMelchard/workout` load cells                                       |
 
 ## Use
 
 ```js
 import { init, parse, expand, serialize } from '@jakobmelchard/workline'
 
-await init()                    // once; loads the wasm parser
+await init() // once; loads the wasm parser
 
 const { lines, errors } = parse(cell)
-const sets = expand(lines[0])   // one entry per set, defaults applied
+const sets = expand(lines[0]) // one entry per set, defaults applied
 const canonical = serialize({ lines, errors })
 ```
 

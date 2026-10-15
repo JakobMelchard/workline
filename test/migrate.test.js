@@ -1,7 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { init, parse, expand } from '../lib/index.js'
-import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf, assertWritable, sheetsClient, readSheet, updatesOf } from '../scripts/migrate-legacy.js'
+import {
+  migrateCell,
+  parseLegacyLine,
+  readCells,
+  parseCsv,
+  colName,
+  sheetIdOf,
+  assertWritable,
+  sheetsClient,
+  readSheet,
+  updatesOf,
+} from '../scripts/migrate-legacy.js'
 
 await init()
 
@@ -9,10 +20,12 @@ await init()
  * @param {string} cell legacy cell
  * @returns {string[]} migrated lines
  */
-const lines = cell => migrateCell(cell).cell.split('\n')
+const lines = (cell) => migrateCell(cell).cell.split('\n')
 
 test('legacy grammar rules', () => {
-  assert.deepEqual(parseLegacyLine('3x8@60'), { entry: { sets: 3, value: 8, type: '', weight: 60, weightUnit: 'kg' } })
+  assert.deepEqual(parseLegacyLine('3x8@60'), {
+    entry: { sets: 3, value: 8, type: '', weight: 60, weightUnit: 'kg' },
+  })
   assert.deepEqual(parseLegacyLine(' 2x30s '), { entry: { sets: 2, value: 30, type: 's' } })
   assert.deepEqual(parseLegacyLine('3x8 @60'), { error: 'bad setsxvalue' })
   assert.deepEqual(parseLegacyLine('3x8@'), { error: 'bad weight' })
@@ -27,13 +40,21 @@ test('unitless weight becomes kg', () => {
 })
 
 test('explicit units keep their unit, lowercased, aliases folded', () => {
-  assert.deepEqual(lines('3x8@60lb\n1x5@100KG\n3x8@7.5lbs\n2x5@20kgs'), ['3x8 60lb', '1x5 100kg', '3x8 7.5lb', '2x5 20kg'])
+  assert.deepEqual(lines('3x8@60lb\n1x5@100KG\n3x8@7.5lbs\n2x5@20kgs'), [
+    '3x8 60lb',
+    '1x5 100kg',
+    '3x8 7.5lb',
+    '2x5 20kg',
+  ])
 })
 
 test('unitless @ at most 10 is ambiguous with RPE and left for review', () => {
   const r = migrateCell('5x5@8\n3x8@60')
   assert.equal(r.cell, '5x5@8\n3x8 60kg')
-  assert.deepEqual(r.manual.map(m => m.line), [0])
+  assert.deepEqual(
+    r.manual.map((m) => m.line),
+    [0],
+  )
   assert.match(r.manual[0].reason, /RPE/)
 })
 
@@ -61,7 +82,10 @@ test('legacy r means reps', () => {
 test('legacy m is ambiguous and never auto-converted', () => {
   const r = migrateCell('1x400m\n2x5m@20\n3x8@60')
   assert.equal(r.cell, '1x400m\n2x5m@20\n3x8 60kg')
-  assert.deepEqual(r.manual.map(m => m.line), [0, 1])
+  assert.deepEqual(
+    r.manual.map((m) => m.line),
+    [0, 1],
+  )
   assert.match(r.manual[0].reason, /"m" now means minutes/)
 })
 
@@ -73,7 +97,10 @@ test('valid cells are unchanged', () => {
 test('blank lines and line indexes are preserved', () => {
   const r = migrateCell('3x8@60\n\n3x5@70')
   assert.equal(r.cell, '3x8 60kg\n\n3x5 70kg')
-  assert.deepEqual(r.changes.map(c => c.line), [0, 2])
+  assert.deepEqual(
+    r.changes.map((c) => c.line),
+    [0, 2],
+  )
 })
 
 test('unknown type suffix goes to manual and stays verbatim', () => {
@@ -111,7 +138,10 @@ test('every converted cell parses cleanly in workline', () => {
 })
 
 test('readCells: json shapes and csv', () => {
-  assert.deepEqual(readCells('["a","b"]'), [{ id: '#0', cell: 'a' }, { id: '#1', cell: 'b' }])
+  assert.deepEqual(readCells('["a","b"]'), [
+    { id: '#0', cell: 'a' },
+    { id: '#1', cell: 'b' },
+  ])
   assert.deepEqual(readCells('[{"id":"x","load":"3x8"}]'), [{ id: 'x', cell: '3x8' }])
   assert.deepEqual(readCells('{"k":"3x8"}'), [{ id: 'k', cell: '3x8' }])
   assert.deepEqual(readCells('workout,load\nbench,"3x8@60\n3x5@70"\nrow,2x30s\n'), [
@@ -141,7 +171,7 @@ test('--write is only allowed for the test sheet', () => {
   assert.doesNotThrow(() => assertWritable('abc123', url))
 })
 
-test('a read-only sheets client refuses writes without calling fetch', async t => {
+test('a read-only sheets client refuses writes without calling fetch', async (t) => {
   const fetch = t.mock.method(globalThis, 'fetch', async () => Response.json({}))
   const ro = sheetsClient('abc123', 'tok')
   await assert.rejects(ro.call('/values:batchUpdate', { method: 'POST' }), /read-only/)
@@ -151,25 +181,44 @@ test('a read-only sheets client refuses writes without calling fetch', async t =
 })
 
 test('readSheet addresses the load column per tab, quoting tab names', async () => {
-  const tabs = { 'Plan': [['day', 'load'], ['a', '3x8@60'], ['b']], "Bob's": [['x', 'y', 'Load '], ['', '', '2x30s']], 'Notes': [['text'], ['hi']] }
+  const tabs = {
+    Plan: [['day', 'load'], ['a', '3x8@60'], ['b']],
+    "Bob's": [
+      ['x', 'y', 'Load '],
+      ['', '', '2x30s'],
+    ],
+    Notes: [['text'], ['hi']],
+  }
   /** @type {Record<string, string[][]>} */
   const byTab = tabs
-  const client = { tabs: async () => Object.keys(tabs), values: async (/** @type {string} */ t) => byTab[t] }
+  const client = {
+    tabs: async () => Object.keys(tabs),
+    values: async (/** @type {string} */ t) => byTab[t],
+  }
   const r = await readSheet(client)
   assert.deepEqual(r.scanned, ['Plan', "Bob's"])
   assert.deepEqual(r.skipped, ['Notes'])
-  assert.deepEqual(r.sources.map(s => [s.id, s.row, s.range, s.cell]), [
-    ['Plan!B2', 2, "'Plan'!B2", '3x8@60'],
-    ['Plan!B3', 3, "'Plan'!B3", ''],
-    ["Bob's!C2", 2, "'Bob''s'!C2", '2x30s'],
-  ])
+  assert.deepEqual(
+    r.sources.map((s) => [s.id, s.row, s.range, s.cell]),
+    [
+      ['Plan!B2', 2, "'Plan'!B2", '3x8@60'],
+      ['Plan!B3', 3, "'Plan'!B3", ''],
+      ["Bob's!C2", 2, "'Bob''s'!C2", '2x30s'],
+    ],
+  )
   assert.deepEqual((await readSheet(client, ['Notes'])).scanned, [])
 })
 
 test('updatesOf writes only changed cells', async () => {
-  const client = { tabs: async () => ['Plan'], values: async () => [['load'], ['3x8@60'], ['2x30s']] }
+  const client = {
+    tabs: async () => ['Plan'],
+    values: async () => [['load'], ['3x8@60'], ['2x30s']],
+  }
   await init()
   const { sources } = await readSheet(client)
-  const results = sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))
-  assert.deepEqual(updatesOf(results), { valueInputOption: 'RAW', data: [{ range: "'Plan'!A2", values: [['3x8 60kg']] }] })
+  const results = sources.map((s) => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))
+  assert.deepEqual(updatesOf(results), {
+    valueInputOption: 'RAW',
+    data: [{ range: "'Plan'!A2", values: [['3x8 60kg']] }],
+  })
 })
