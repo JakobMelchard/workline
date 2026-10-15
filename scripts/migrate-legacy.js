@@ -337,6 +337,12 @@ export async function readSheet(client, only = []) {
 /** @param {Source[]} sources @returns {Result[]} */
 const migrateAll = sources => sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))
 
+/** @param {Result[]} results */
+export const updatesOf = results => ({
+  valueInputOption: 'RAW',
+  data: results.filter(r => r.changes.length).map(r => ({ range: r.range, values: [[r.cell]] })),
+})
+
 const USAGE = `usage: migrate-legacy.js [file.json|file.csv|-] [--sheet ID [--tab NAME]... [--write]] [--json]
   default: read cells from a file or stdin, print a diff-style report (never writes)
   --sheet  spreadsheet id or URL; read every tab's load column (read-only scope) and print report + proposed batchUpdate
@@ -377,10 +383,7 @@ async function main(argv) {
   const ro = sheetsClient(o.sheet, await accessToken(sa, SCOPE_RO))
   const { sources, scanned, skipped } = await readSheet(ro, o.tabs)
   const results = migrateAll(sources)
-  const updates = {
-    valueInputOption: 'RAW',
-    data: results.filter(r => r.changes.length).map(r => ({ range: r.range, values: [[r.cell]] })),
-  }
+  const updates = updatesOf(results)
   if (o.json) console.log(JSON.stringify({ scanned, skipped, results, updates }, null, 2))
   else {
     console.log(`tabs scanned ${scanned.length}: ${scanned.join(', ')}`)
@@ -391,6 +394,11 @@ async function main(argv) {
   }
   if (!o.write) return console.error('dry run: nothing written')
   if (!updates.data.length) return console.error('nothing to write')
+
+  // Targets are fixed A1 addresses, so refuse if rows moved or cells changed since the read.
+  const now = new Map((await readSheet(ro, o.tabs)).sources.map(s => [s.range, s.cell]))
+  const moved = results.filter(r => r.changes.length && now.get(r.range) !== r.from)
+  if (moved.length) throw new Error(`sheet changed since read, nothing written: ${moved.map(r => r.id).join(', ')}`)
 
   const rw = sheetsClient(o.sheet, await accessToken(sa, SCOPE_RW), true)
   const res = await rw.call('/values:batchUpdate', { method: 'POST', body: JSON.stringify(updates) })

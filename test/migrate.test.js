@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { init, parse, expand } from '../lib/index.js'
-import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf, assertWritable, sheetsClient } from '../scripts/migrate-legacy.js'
+import { migrateCell, parseLegacyLine, readCells, parseCsv, colName, sheetIdOf, assertWritable, sheetsClient, readSheet, updatesOf } from '../scripts/migrate-legacy.js'
 
 await init()
 
@@ -145,4 +145,26 @@ test('a read-only sheets client refuses writes without calling fetch', async t =
   assert.equal(fetch.mock.callCount(), 0)
   await ro.call('?fields=x')
   assert.equal(fetch.mock.callCount(), 1)
+})
+
+test('readSheet addresses the load column per tab, quoting tab names', async () => {
+  const tabs = { 'Plan': [['day', 'load'], ['a', '3x8@60'], ['b']], "Bob's": [['x', 'y', 'Load '], ['', '', '2x30s']], 'Notes': [['text'], ['hi']] }
+  const client = /** @type {any} */ ({ tabs: async () => Object.keys(tabs), values: async (/** @type {string} */ t) => tabs[/** @type {keyof typeof tabs} */ (t)] })
+  const r = await readSheet(client)
+  assert.deepEqual(r.scanned, ['Plan', "Bob's"])
+  assert.deepEqual(r.skipped, ['Notes'])
+  assert.deepEqual(r.sources.map(s => [s.id, s.row, s.range, s.cell]), [
+    ['Plan!B2', 2, "'Plan'!B2", '3x8@60'],
+    ['Plan!B3', 3, "'Plan'!B3", ''],
+    ["Bob's!C2", 2, "'Bob''s'!C2", '2x30s'],
+  ])
+  assert.deepEqual((await readSheet(client, ['Notes'])).scanned, [])
+})
+
+test('updatesOf writes only changed cells', async () => {
+  const client = /** @type {any} */ ({ tabs: async () => ['Plan'], values: async () => [['load'], ['3x8@60'], ['2x30s']] })
+  await init()
+  const { sources } = await readSheet(client)
+  const results = sources.map(s => ({ ...s, from: s.cell, ...migrateCell(s.cell) }))
+  assert.deepEqual(updatesOf(results), { valueInputOption: 'RAW', data: [{ range: "'Plan'!A2", values: [['3x8 60kg']] }] })
 })
