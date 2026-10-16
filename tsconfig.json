@@ -1,4 +1,11 @@
 {
   "extends": "@jakobmelchard/config/tsconfig",
-  "include": ["lib", "test", "scripts"]
+  "include": [
+    "grammar.js",
+    "eslint.config.js",
+    "jakobmelchard-config.d.ts",
+    "lib",
+    "test",
+    "scripts"
+  ]
 }

@@ -11,9 +11,15 @@ repos:
     rev: v1.0.1
     hooks:
       - id: conventional-commit
-      - id: eslint
+      - id: prettier
   - repo: local
     hooks:
+      # the org eslint hook runs --quiet; warnings fail here as in CI
+      - id: eslint
+        name: eslint
+        entry: npx --no-install eslint --max-warnings 0
+        language: system
+        types: [javascript]
       # workline is a dependency: a broken export reaches every consumer before their CI runs
       - id: tsc
         name: tsc
