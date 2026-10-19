@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/JakobMelchard/workline/compare/v0.5.1...v0.5.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* **deps:** update patch and digest ([#58](https://github.com/JakobMelchard/workline/issues/58)) ([d283d4e](https://github.com/JakobMelchard/workline/commit/d283d4e88d2c175f1e4e545a5409d0b90bc8984d))
+
 ## [0.5.1](https://github.com/JakobMelchard/workline/compare/v0.5.0...v0.5.1) (2026-10-15)
 
 
