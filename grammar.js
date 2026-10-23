@@ -15,14 +15,20 @@ export default grammar({
   extras: (_) => [/[ \t\r]/],
 
   rules: {
-    document: ($) => seq(repeat(seq(optional($.line), '\n')), optional($.line)),
+    document: ($) => seq(repeat(seq(optional($._row), '\n')), optional($._row)),
+
+    _row: ($) => choice($.line, $.header),
 
     line: ($) =>
       seq(
         optional(seq(field('name', $.name), '/')),
         sep1($.group, ','),
         optional(seq('/', field('defaults', $.defaults))),
+        optional(seq('=>', field('log', sep1($.number, ',')))),
       ),
+
+    header: ($) => seq('#', field('text', $.header_text)),
+    header_text: (_) => /[^\n]+/,
 
     name: (_) => /[^\d\s/][^/\n]*/,
 

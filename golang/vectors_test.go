@@ -17,6 +17,10 @@ type vector struct {
 	Errors    []int           `json:"errors"`
 	Lines     json.RawMessage `json:"lines"`
 	Comment   string          `json:"comment"`
+	Headers   []struct {
+		Text string `json:"text"`
+	} `json:"headers"`
+	Logs [][]float64 `json:"logs"`
 }
 
 type viewLine struct {
@@ -74,6 +78,33 @@ func TestVectors(t *testing.T) {
 		}
 		t.Run(name, func(t *testing.T) {
 			p := workline.Parse(vec.In)
+			gotHeaders := []struct {
+				Text string `json:"text"`
+			}{}
+			if len(vec.Headers) == 0 {
+				vec.Headers = gotHeaders
+			}
+			gotHeaders = make([]struct {
+				Text string `json:"text"`
+			}, len(p.Headers))
+			for i, h := range p.Headers {
+				gotHeaders[i].Text = h.Text
+			}
+			if !reflect.DeepEqual(gotHeaders, vec.Headers) {
+				t.Fatalf("headers = %#v, want %#v", gotHeaders, vec.Headers)
+			}
+			gotLogs := [][]float64{}
+			if vec.Logs == nil {
+				vec.Logs = gotLogs
+			}
+			for _, l := range p.Lines {
+				if len(l.Log) > 0 {
+					gotLogs = append(gotLogs, l.Log)
+				}
+			}
+			if !reflect.DeepEqual(gotLogs, vec.Logs) {
+				t.Fatalf("logs = %#v, want %#v", gotLogs, vec.Logs)
+			}
 			wantErrors := vec.Errors
 			if wantErrors == nil {
 				wantErrors = []int{}

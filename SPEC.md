@@ -22,6 +22,8 @@ Squat / 3x5 80% / 3m        last section applies to every group
 3 x 8|6|4|2+                week 1: 3x8+, week 2: 3x6+, ..., week 4: 3x2+
 90-150'                     one set of 90-150 minutes
 3 x 5-10''                  seconds
+# Exercise | Plan | Log     sheet header; tabular headings stay in the cell
+Bench / 3x8 => 8, 8, 6      performed values for the three sets
 ```
 
 ## Syntax
@@ -30,7 +32,8 @@ Squat / 3x5 80% / 3m        last section applies to every group
 Every implementation parses with the parser generated from it, so this spec
 only covers what the syntax cannot express. In short:
 
-- `line = [name "/"] group {"," group} ["/" mods]`, one per text line
+- `line = [name "/"] group {"," group} ["/" mods] ["=>" N {"," N}]`, one per text line
+- `header = "#" text`, a retained spreadsheet header row
 - `name` is any text before the first `/` that does not start with a digit
 - `group = [SETS x] TARGET [mods]`, `x` also `X` or `×`; without `SETS x`
   it is one set
@@ -65,6 +68,12 @@ before a suffix.
 - **percent**: percentage of 1RM, `0 < value <= 200`. `+` as for weight.
 - **rpe**: target RPE, `1 <= value <= 10`. `+` means the lifter logs actual RPE.
 - **rest**: rest after each set, a whole number, stored in seconds, at most 86400.
+- **sheet headers**: a line beginning with `#` is retained as a header, with its
+  text trimmed. It may contain spreadsheet column labels separated by tabs,
+  pipes, or other ordinary text; workline does not interpret those labels.
+- **logs**: `=> N, N, ...` after a line records numeric performed values in set
+  order (for example actual reps). Values are retained and serialized; this
+  first form deliberately leaves their meaning to the sheet using them.
 - A group holds at most one of each mod kind, and not both weight and percent.
 - The trailing `/ mods` section is the line's defaults. A group's own mod wins
   over the default of the same kind; weight and percent count as one kind.
@@ -91,6 +100,8 @@ Serializing produces:
 - rest as `Nm` when a whole number of minutes, else `Ns`
 - numbers without trailing zeros (`62.5`, `60`)
 - defaults as ` / mods` in the same mod order, omitted when empty
+- header rows as `# ` followed by trimmed header text
+- logs as ` => ` followed by comma-space separated numbers
 
 `parse(serialize(parse(x)))` must equal `parse(x)`.
 
