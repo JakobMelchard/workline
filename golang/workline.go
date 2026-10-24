@@ -187,14 +187,14 @@ func (p *lineParser) line(root *sitter.Node, index int) (Line, error) {
 		}
 		line.Defaults = mods
 	}
-	if log := node.ChildByFieldName("log"); log != nil {
-		for i := uint(0); i < log.NamedChildCount(); i++ {
-			v, err := strconv.ParseFloat(p.text(log.NamedChild(i)), 64)
-			if err != nil {
-				return Line{}, err
-			}
-			line.Log = append(line.Log, v)
+	cur := node.Walk()
+	defer cur.Close()
+	for _, n := range node.ChildrenByFieldName("log", cur) {
+		v, err := strconv.ParseFloat(p.text(&n), 64)
+		if err != nil {
+			return Line{}, err
 		}
+		line.Log = append(line.Log, v)
 	}
 	return line, nil
 }

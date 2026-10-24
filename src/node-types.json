@@ -125,10 +125,6 @@
         "required": false,
         "types": [
           {
-            "type": ",",
-            "named": false
-          },
-          {
             "type": "number",
             "named": true
           }

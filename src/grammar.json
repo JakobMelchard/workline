@@ -145,33 +145,37 @@
                   "value": "=>"
                 },
                 {
-                  "type": "FIELD",
-                  "name": "log",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "FIELD",
+                      "name": "log",
+                      "content": {
                         "type": "SYMBOL",
                         "name": "number"
-                      },
-                      {
-                        "type": "REPEAT",
-                        "content": {
-                          "type": "SEQ",
-                          "members": [
-                            {
-                              "type": "STRING",
-                              "value": ","
-                            },
-                            {
+                      }
+                    },
+                    {
+                      "type": "REPEAT",
+                      "content": {
+                        "type": "SEQ",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": ","
+                          },
+                          {
+                            "type": "FIELD",
+                            "name": "log",
+                            "content": {
                               "type": "SYMBOL",
                               "name": "number"
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
-                    ]
-                  }
+                    }
+                  ]
                 }
               ]
             },
@@ -205,7 +209,7 @@
     },
     "name": {
       "type": "PATTERN",
-      "value": "[^\\d\\s/][^/\\n]*"
+      "value": "[^\\d\\s/#][^/\\n]*"
     },
     "group": {
       "type": "SEQ",

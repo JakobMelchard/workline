@@ -24,13 +24,13 @@ export default grammar({
         optional(seq(field('name', $.name), '/')),
         sep1($.group, ','),
         optional(seq('/', field('defaults', $.defaults))),
-        optional(seq('=>', field('log', sep1($.number, ',')))),
+        optional(seq('=>', sep1(field('log', $.number), ','))),
       ),
 
     header: ($) => seq('#', field('text', $.header_text)),
     header_text: (_) => /[^\n]+/,
 
-    name: (_) => /[^\d\s/][^/\n]*/,
+    name: (_) => /[^\d\s/#][^/\n]*/,
 
     // "SETS x" may be left out for one set: "90-150'" is "1x90-150m".
     group: ($) =>

@@ -34,7 +34,7 @@ only covers what the syntax cannot express. In short:
 
 - `line = [name "/"] group {"," group} ["/" mods] ["=>" N {"," N}]`, one per text line
 - `header = "#" text`, a retained spreadsheet header row
-- `name` is any text before the first `/` that does not start with a digit
+- `name` is any text before the first `/` that does not start with a digit or `#`
 - `group = [SETS x] TARGET [mods]`, `x` also `X` or `×`; without `SETS x`
   it is one set
 - `TARGET = STEP {"|" STEP} [+]`, one step per week of a block
@@ -101,7 +101,7 @@ Serializing produces:
 - numbers without trailing zeros (`62.5`, `60`)
 - defaults as ` / mods` in the same mod order, omitted when empty
 - header rows as `# ` followed by trimmed header text
-- logs as ` => ` followed by comma-space separated numbers
+- logs as `=>` with a space on each side, followed by comma-space separated numbers
 
 `parse(serialize(parse(x)))` must equal `parse(x)`.
 

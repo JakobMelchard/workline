@@ -23,8 +23,14 @@ const view = (p, week) => ({
 for (const v of vectors) {
   test(v.comment ?? JSON.stringify(v.in), () => {
     const p = parse(v.in)
-    assert.deepEqual(p.headers.map(({ text }) => ({ text })), v.headers ?? [])
-    assert.deepEqual(p.lines.filter((l) => l.log).map((l) => l.log), v.logs ?? [])
+    assert.deepEqual(
+      p.headers.map(({ text }) => ({ text })),
+      v.headers ?? [],
+    )
+    assert.deepEqual(
+      p.lines.filter((l) => l.log).map((l) => l.log),
+      v.logs ?? [],
+    )
     assert.deepEqual(view(p, v.week), { errors: v.errors ?? [], lines: v.lines ?? [] })
     const out = serialize(p)
     assert.equal(out, v.canonical ?? v.in)
