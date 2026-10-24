@@ -313,5 +313,19 @@
     "comment": "an empty defaults section is still an error",
     "in": "3x8 / ",
     "errors": [0]
-  }
+  },
+  {
+    "comment": "sheet header rows and performed values round trip",
+    "in": "# Exercise | Plan | Log\nBench / 3x8 => 8, 8, 6",
+    "canonical": "# Exercise | Plan | Log\nBench / 3x8 => 8, 8, 6",
+    "headers": [{ "text": "Exercise | Plan | Log" }],
+    "logs": [[8, 8, 6]],
+    "lines": [{ "name": "Bench", "sets": [
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } },
+      { "target": { "min": 8, "unit": "reps" } }
+    ] }]
+  },
+  { "comment": "header text is required", "in": "#", "errors": [0] },
+  { "comment": "logs require numeric values", "in": "3x8 => 8, nope", "errors": [0] }
 ]

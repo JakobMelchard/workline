@@ -39,6 +39,9 @@ const sets = expand(lines[0]) // one entry per set, defaults applied
 const canonical = serialize({ lines, errors })
 ```
 
+Sheet header rows start with `#` and are retained in `headers`. A prescription
+can carry performed numeric values after `=>`, in set order; see `SPEC.md`.
+
 On Cloudflare Workers, import both wasm files as modules and pass them in:
 
 ```js

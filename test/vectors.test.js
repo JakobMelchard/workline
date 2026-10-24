@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { init, parse, serialize, expand } from '../lib/index.js'
 
-/** @typedef {{in:string, week?:number, canonical?:string, errors?:number[], lines?:{name?:string, sets:object[]}[], comment?:string}} Vector */
+/** @typedef {{in:string, week?:number, canonical?:string, errors?:number[], headers?:{text:string}[], logs?:number[][], lines?:{name?:string, sets:object[]}[], comment?:string}} Vector */
 await init()
 /** @type {Vector[]} */
 const vectors = JSON.parse(readFileSync(new URL('vectors.json', import.meta.url), 'utf8'))
@@ -23,6 +23,14 @@ const view = (p, week) => ({
 for (const v of vectors) {
   test(v.comment ?? JSON.stringify(v.in), () => {
     const p = parse(v.in)
+    assert.deepEqual(
+      p.headers.map(({ text }) => ({ text })),
+      v.headers ?? [],
+    )
+    assert.deepEqual(
+      p.lines.filter((l) => l.log).map((l) => l.log),
+      v.logs ?? [],
+    )
     assert.deepEqual(view(p, v.week), { errors: v.errors ?? [], lines: v.lines ?? [] })
     const out = serialize(p)
     assert.equal(out, v.canonical ?? v.in)
