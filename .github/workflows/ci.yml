@@ -10,7 +10,7 @@ on:
 
 jobs:
   js:
-    uses: JakobMelchard/.github/.github/workflows/node.yml@531b4dcb30293e6219d67e312e164cc262a69955 # v2.3.1
+    uses: JakobMelchard/.github/.github/workflows/node.yml@88bfcf0fb6db99ff67f1e0e8f082f9b7e391028d # v2.4.1
     with:
       check-cmd: npm run check
       lint-cmd: npx eslint --max-warnings 0 .
@@ -20,10 +20,10 @@ jobs:
       test-cmd: npm test && npm run build && git diff --exit-code -- src/ bindings/go/parser_sum.go && npm test
 
   go:
-    uses: JakobMelchard/.github/.github/workflows/go.yml@531b4dcb30293e6219d67e312e164cc262a69955 # v2.3.1
+    uses: JakobMelchard/.github/.github/workflows/go.yml@88bfcf0fb6db99ff67f1e0e8f082f9b7e391028d # v2.4.1
 
   hooks:
-    uses: JakobMelchard/.github/.github/workflows/hooks.yml@531b4dcb30293e6219d67e312e164cc262a69955 # v2.3.1
+    uses: JakobMelchard/.github/.github/workflows/hooks.yml@88bfcf0fb6db99ff67f1e0e8f082f9b7e391028d # v2.4.1
     with:
       # prettier, tsc, eslint and npm test run in the js job above
       skip: prettier,tsc,eslint,test
