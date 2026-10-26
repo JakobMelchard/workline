@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2](https://github.com/JakobMelchard/workline/compare/v0.5.1...v0.5.2) (2026-10-26)
+
+
+### Features
+
+* **parser:** support sheet headers and logs ([#60](https://github.com/JakobMelchard/workline/issues/60)) ([1c096f9](https://github.com/JakobMelchard/workline/commit/1c096f98c30605986bb07884faf19508045f528d))
+
+
+### Bug Fixes
+
+* **deps:** update patch and digest ([#58](https://github.com/JakobMelchard/workline/issues/58)) ([d283d4e](https://github.com/JakobMelchard/workline/commit/d283d4e88d2c175f1e4e545a5409d0b90bc8984d))
+
 ## [0.5.1](https://github.com/JakobMelchard/workline/compare/v0.5.0...v0.5.1) (2026-10-15)
 
 
