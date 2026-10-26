@@ -59,10 +59,18 @@ type Group struct {
 
 // Line is one parsed text line. Index is its 0-based line number in the cell.
 type Line struct {
-	Index    int     `json:"index"`
-	Name     string  `json:"name,omitempty"`
-	Groups   []Group `json:"groups"`
-	Defaults Mods    `json:"defaults"`
+	Index    int       `json:"index"`
+	Name     string    `json:"name,omitempty"`
+	Groups   []Group   `json:"groups"`
+	Defaults Mods      `json:"defaults"`
+	Log      []float64 `json:"log,omitempty"`
+	Header   *string   `json:"-"`
+}
+
+// Header is a spreadsheet header row, retained at its original position.
+type Header struct {
+	Index int    `json:"index"`
+	Text  string `json:"text"`
 }
 
 // SetSpec is one expanded set with the line's defaults applied.
@@ -80,8 +88,9 @@ type ParseError struct {
 
 // Parsed is the result of Parse.
 type Parsed struct {
-	Lines  []Line       `json:"lines"`
-	Errors []ParseError `json:"errors"`
+	Lines   []Line       `json:"lines"`
+	Headers []Header     `json:"headers,omitempty"`
+	Errors  []ParseError `json:"errors"`
 }
 
 type lineError string
@@ -99,7 +108,7 @@ var (
 // Parse parses a cell, one exercise per text line. Blank lines are skipped;
 // a bad line lands in Errors and the others still parse.
 func Parse(cell string) Parsed {
-	out := Parsed{Lines: []Line{}, Errors: []ParseError{}}
+	out := Parsed{Lines: []Line{}, Headers: []Header{}, Errors: []ParseError{}}
 	for i, raw := range strings.Split(cell, "\n") {
 		if strings.TrimSpace(raw) == "" {
 			continue
@@ -109,7 +118,11 @@ func Parse(cell string) Parsed {
 			out.Errors = append(out.Errors, ParseError{Line: i, Raw: raw, Reason: err.Error()})
 			continue
 		}
-		out.Lines = append(out.Lines, line)
+		if line.Header != nil {
+			out.Headers = append(out.Headers, Header{Index: i, Text: *line.Header})
+		} else {
+			out.Lines = append(out.Lines, line)
+		}
 	}
 	return out
 }
@@ -148,6 +161,10 @@ func (p *lineParser) line(root *sitter.Node, index int) (Line, error) {
 	if root.HasError() {
 		return Line{}, lineError(p.syntaxError(root))
 	}
+	if node := firstKid(root, "header"); node != nil {
+		t := strings.TrimSpace(p.text(node.ChildByFieldName("text")))
+		return Line{Index: index, Header: &t}, nil
+	}
 	node := firstKid(root, "line")
 	if node == nil {
 		return Line{}, lineError("no sets")
@@ -169,6 +186,15 @@ func (p *lineParser) line(root *sitter.Node, index int) (Line, error) {
 			return Line{}, err
 		}
 		line.Defaults = mods
+	}
+	cur := node.Walk()
+	defer cur.Close()
+	for _, n := range node.ChildrenByFieldName("log", cur) {
+		v, err := strconv.ParseFloat(p.text(&n), 64)
+		if err != nil {
+			return Line{}, err
+		}
+		line.Log = append(line.Log, v)
 	}
 	return line, nil
 }
@@ -372,7 +398,7 @@ func (p *lineParser) num(n *sitter.Node) float64 {
 }
 
 // targetUnits maps target suffixes to JSON unit names: "m", "min" and "'"
-// are minutes, "''" seconds.
+// are minutes, "”" seconds.
 var targetUnits = map[string]string{"r": "reps", "s": "s", "m": "min", "min": "min", "km": "km", "'": "min", "''": "s"}
 
 // unitSuffix is the canonical target suffix per unit; reps has none.
@@ -482,6 +508,9 @@ func Serialize(parsed Parsed) string {
 	for _, l := range parsed.Lines {
 		rows = append(rows, row{l.Index, SerializeLine(l)})
 	}
+	for _, h := range parsed.Headers {
+		rows = append(rows, row{h.Index, "# " + h.Text})
+	}
 	for _, e := range parsed.Errors {
 		rows = append(rows, row{e.Line, e.Raw})
 	}
@@ -518,6 +547,13 @@ func SerializeLine(line Line) string {
 	b.WriteString(strings.Join(groups, ", "))
 	if d := SerializeMods(line.Defaults); len(d) > 0 {
 		b.WriteString(" / " + strings.Join(d, " "))
+	}
+	if len(line.Log) > 0 {
+		vals := make([]string, len(line.Log))
+		for i, v := range line.Log {
+			vals[i] = jsNum(v)
+		}
+		b.WriteString(" => " + strings.Join(vals, ", "))
 	}
 	return b.String()
 }

@@ -40,6 +40,10 @@
       "required": false,
       "types": [
         {
+          "type": "header",
+          "named": true
+        },
+        {
           "type": "line",
           "named": true
         }
@@ -87,6 +91,22 @@
     }
   },
   {
+    "type": "header",
+    "named": true,
+    "fields": {
+      "text": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "header_text",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "line",
     "named": true,
     "fields": {
@@ -96,6 +116,16 @@
         "types": [
           {
             "type": "defaults",
+            "named": true
+          }
+        ]
+      },
+      "log": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "number",
             "named": true
           }
         ]
@@ -334,6 +364,10 @@
     "named": false
   },
   {
+    "type": "#",
+    "named": false
+  },
+  {
     "type": "%",
     "named": false
   },
@@ -350,6 +384,10 @@
     "named": false
   },
   {
+    "type": "=>",
+    "named": false
+  },
+  {
     "type": "@",
     "named": false
   },
@@ -359,6 +397,10 @@
   },
   {
     "type": "ask_weight",
+    "named": true
+  },
+  {
+    "type": "header_text",
     "named": true
   },
   {
