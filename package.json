@@ -2,6 +2,9 @@
   "name": "@jakobmelchard/workline",
   "version": "0.5.2",
   "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
