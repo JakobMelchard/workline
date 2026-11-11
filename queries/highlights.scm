@@ -18,3 +18,7 @@
 ["/" "," "|"] @punctuation.delimiter
 ["-"] @operator
 (times) @operator
+
+(header) @comment
+(line "=>" @operator)
+(line log: (number) @number)
