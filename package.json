@@ -1,6 +1,6 @@
 {
   "name": "@jakobmelchard/workline",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "type": "module",
   "engines": {
     "node": "^22.23.4 || ^24.22.1 || >=26.12.1"

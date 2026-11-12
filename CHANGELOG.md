@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/JakobMelchard/workline/compare/v0.5.2...v0.5.3) (2026-11-11)
+
+
+### Bug Fixes
+
+* **queries:** highlight sheet headers and =&gt; logs ([#68](https://github.com/JakobMelchard/workline/issues/68)) ([121f634](https://github.com/JakobMelchard/workline/commit/121f6349a399ffca474e7797fa4c31ca2d3a6b43))
+
 ## [0.5.2](https://github.com/JakobMelchard/workline/compare/v0.5.1...v0.5.2) (2026-10-26)
 
 
